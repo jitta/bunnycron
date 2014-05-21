@@ -1,0 +1,9 @@
+30 0 * * 1-5 node examples/test_command.js ok
+30 0 * * 1-5 node examples/test_command.js ok
+0 1 * * 1-5 node examples/test_command.js ok
+0 1 * * 1-5 node examples/test_command.js ok
+0 1 * * 1-5 node examples/test_command.js ok
+0 2 * * 6 node examples/test_command.js ok
+0 3 * * 1-5 node examples/test_command.js ok
+0 21 * * 1-5 node examples/test_command.js ok
+0 0 1 * * node examples/test_command.js ok
