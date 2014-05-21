@@ -1,0 +1,9 @@
+.DS_Store
+upload
+*.sublime*
+tmp
+npm-debug.log
+*.bak*
+*.rdb
+node_modules
+dump/*
