@@ -10,6 +10,12 @@
  * All dependencies
  */
 
+var Cron = require('./cron')
+
+/**
+ * Expose BunnyCron
+ */
+
 exports = module.exports = BunnyCron
 
 /**
@@ -24,15 +30,24 @@ exports.version = require('../package.json').version
 var app;
 
 /**
- * Expose the server.
+ * Expose BunnyCron and the server.
  */
 
-Object.defineProperty(exports, 'app', {
-  get: function () {
-    return app || (app = require('./http'));
-  }
-});
+// Object.defineProperty(exports, 'app', {
+//   get: function () {
+//     return app || (app = require('./http'));
+//   }
+// });
 
 function BunnyCron (options) {
   options = options || {}
+  if(options.cronfile){
+    Cron.loadfile(options.cronfile);
+  }
+  return {
+    app: app || (app = require('./http'))
+  }
 }
+
+// exports.create = function (options){
+// }
