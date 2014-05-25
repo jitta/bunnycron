@@ -65,9 +65,9 @@ function BunnyCron (options) {
       });
       return client;
     }
-  this.client = this.client.createClient();
   }
 
+  this.client = redis.createClient();
   this.options = _.merge(defaults, options);
   // console.log(this.options.cronFile)
   this.jobs = Cron.loadFile(this.options.cronFile);
@@ -100,20 +100,18 @@ BunnyCron.prototype.addCron = function(job) {
     key = that.options.redisPrefix + ':jobs:' + job.id + ':run'
     now = (new Date()).getTime();
     // console.log(key)
-    this.client.setnx(key, now, function(err,result){
+    that.client.setnx(key, now, function(err,result){
       // console.log(job.command)
       if(result == 1){
-        // console.log('runcron', job);
-        // console.log('never run this job before')
         execFn = function (error, stdout, stderr) {
-            console.log('run command success',job.id)
-            execResult = {
-              error: error,
-              stdout: stdout,
-              stderr: stderr
-            }
-            that.complete(job.id, execResult)
+          console.log('run command success',job.id)
+          execResult = {
+            error: error,
+            stdout: stdout,
+            stderr: stderr
           }
+          that.complete(job.id, execResult)
+        }
         exec(job.command, execFn);
       }else{
         console.log('')
@@ -133,6 +131,7 @@ BunnyCron.prototype.finishExec = function (error, stdout, stderr) {
 
 BunnyCron.prototype.complete = function(id, data) {
   log = data.stderr || data.stdout
+  console.log(log)
   key = this.options.redisPrefix + ':jobs:' + id
   this.client.del(key + ':run');
   this.client.set(key + ':data',log);
