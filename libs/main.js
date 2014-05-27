@@ -14,7 +14,10 @@ var Cron = require('./cron');
 var _ = require('lodash');
 var CronJob = require('cron').CronJob;
 var exec = require('child_process').exec;
+var childs = {};
+var crons = {};
 redis = require("redis")
+noop = function() {};
 
 /**
  * Expose BunnyCron
@@ -43,7 +46,7 @@ Object.defineProperty(exports, 'app', {
 });
 
 function BunnyCron (options) {
-  var that = this
+  var self = this
   var options = options || {}
   this.cronList = []
   var defaults =  {
@@ -75,12 +78,26 @@ function BunnyCron (options) {
 
   return {
     app: app || (app = require('./http')),
-    bunny: that
+    bunny: self
   }
 }
 
 BunnyCron.prototype.init = function(){
-  this.setCron()
+  this.clearInactiveCron();
+  this.setCron();
+}
+
+BunnyCron.prototype.clearInactiveCron = function(){
+  self = this;
+  hash = this.options.redisPrefix + ':job*'
+  this.client.keys(hash, function(err, results){
+    for (var i = 0; i < results.length; i++) {
+      result = results[i]
+      id = result.split(':')[2]
+      self.del(id, 'is_run');
+      
+    };
+  });
 }
 
 BunnyCron.prototype.setCron = function(){
@@ -90,54 +107,73 @@ BunnyCron.prototype.setCron = function(){
   };
 
 }
+
 BunnyCron.prototype.addCron = function(job) {
-  that = this
-  // cronText = '*/2 ' + job.schedule;
+  self = this
   cronText = '00 ' + job.schedule;
+  // cronText = '*/20 ' + job.schedule;
+
   runCommand = function(){
-    //Is this cron was run
-    // console.log(job.id,'<<<<<<<')
-    key = that.options.redisPrefix + ':jobs:' + job.id + ':run'
-    now = (new Date()).getTime();
-    // console.log(key)
-    that.client.setnx(key, now, function(err,result){
-      // console.log(job.command)
+    hash = self.options.redisPrefix + ':job:' + job.id;
+    self.client.hsetnx(hash, 'is_run', 1, function(err,result){
       if(result == 1){
+        console.log('Running command: ' + job.schedule + ' ' + job.command)
+        self.set(job.id, 'status', 'active');
         execFn = function (error, stdout, stderr) {
-          console.log('run command success',job.id)
+          console.log('Run command completed',job.id)
           execResult = {
             error: error,
             stdout: stdout,
             stderr: stderr
           }
-          that.complete(job.id, execResult)
+          self.complete(job.id, execResult)
         }
-        exec(job.command, execFn);
-      }else{
-        console.log('')
+        childs[job.id] = exec(job.command, execFn);
+        timeout = crons[job.id]._timeout._idleTimeout;
+        killHangJob = function(){
+          childs[job.id].kill('SIGINT');
+          self.complete(job.id, {stdout:'not run complete'});
+        }
+        setTimeout(killHangJob, timeout-1000);
       }
     });
   }
-  new CronJob(cronText, runCommand, null ,true);
-
+  crons[job.id] = new CronJob(cronText, runCommand, null ,true);
 };
-BunnyCron.prototype.isRun = function(id) {
-
-};
-
-BunnyCron.prototype.finishExec = function (error, stdout, stderr) {
-
-}
 
 BunnyCron.prototype.complete = function(id, data) {
   log = data.stderr || data.stdout
-  console.log(log)
+  console.log(data);
   key = this.options.redisPrefix + ':jobs:' + id
-  this.client.del(key + ':run');
-  this.client.set(key + ':data',log);
+  // console.log(if(data.err))
+  if( (data.stderr != '') || data.error){
+    status = 'failed'
+  }else{
+    status = 'completed'
+  }
+  
+  this.set(id, 'status', status);
+  this.set(id, 'completed_at', Date.now());
+  this.set(id, 'log', log);
+  this.del(id, 'is_run');
+
 }
 
+BunnyCron.prototype.del = function(id, key, callback){
+  hash = this.options.redisPrefix + ':job:' + id
+  this.client.hdel(hash, key, callback || noop);
+  return this;
+};
 
-exports.createCron = function ( options ) {
-  BunnyCron.singleton = new BunnyCron( options )
+BunnyCron.prototype.set = function(id, key, val, callback){
+  hash = this.options.redisPrefix + ':job:' + id
+  this.client.hset(hash, key, val, callback || noop);
+  return this;
+};
+
+exports.startCron = function ( options ) {
+  if(!BunnyCron.singleton){
+    BunnyCron.singleton = new BunnyCron( options )
+  }
+  return BunnyCron.singleton
 };
