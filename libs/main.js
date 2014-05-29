@@ -111,7 +111,7 @@ BunnyCron.prototype.setCron = function(){
 BunnyCron.prototype.addCron = function(job) {
   self = this
   cronText = '00 ' + job.schedule;
-  // cronText = '*/20 ' + job.schedule;
+  // cronText = '*/10 ' + job.schedule;
 
   runCommand = function(){
     hash = self.options.redisPrefix + ':job:' + job.id;
@@ -135,6 +135,8 @@ BunnyCron.prototype.addCron = function(job) {
           self.complete(job.id, {stdout:'not run complete'});
         }
         setTimeout(killHangJob, timeout-1000);
+      }else{
+        console.log('Cron was run, status still active')
       }
     });
   }
@@ -143,7 +145,7 @@ BunnyCron.prototype.addCron = function(job) {
 
 BunnyCron.prototype.complete = function(id, data) {
   log = data.stderr || data.stdout
-  console.log(data);
+  console.log(log);
   key = this.options.redisPrefix + ':jobs:' + id
   // console.log(if(data.err))
   if( (data.stderr != '') || data.error){
@@ -151,7 +153,7 @@ BunnyCron.prototype.complete = function(id, data) {
   }else{
     status = 'completed'
   }
-  
+
   this.set(id, 'status', status);
   this.set(id, 'completed_at', Date.now());
   this.set(id, 'log', log);

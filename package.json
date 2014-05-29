@@ -1,7 +1,8 @@
 {
   "name": "bunnycron",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Scheduling task on your webapp",
+  "keyword": ["schedule","cron","cronjob"],
   "main": "index.js",
   "scripts": {
     "test": "npm test"
