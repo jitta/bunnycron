@@ -1,2 +1,3 @@
 * * * * * node examples/cron/echo
 * * * * * node examples/cron/echo --parameter
+*/1 * * * * echo "Hello Terminal"
