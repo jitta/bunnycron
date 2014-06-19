@@ -1,5 +1,5 @@
 (function() {
-  var async, client, cron, crons, getJobsData, getJobsLog, _;
+  var async, bunny, client, getJobsData, getJobsLog, _;
 
   client = require("../../redis").createClient();
 
@@ -7,13 +7,7 @@
 
   _ = require('lodash');
 
-  cron = require("../../cron");
-
-  crons = cron.loadFile("examples/Cronfile");
-
-  exports.jobs = function(req, res) {
-    return res.json(crons);
-  };
+  bunny = require("../../");
 
   exports.stats = function(req, res) {
     return async.parallel({
@@ -37,7 +31,7 @@
   getJobsData = function(done) {
     var results;
     results = {};
-    return client.keys("bunny:job*", function(err, keys) {
+    return client.keys("" + bunny.prefix + ":job*", function(err, keys) {
       var count, key, total, _i, _len, _results;
       if (err) {
         return done(err);
@@ -54,7 +48,6 @@
             id = key.split(':')[2];
             results[id] = item;
             if (count === total) {
-              console.log('aaaaa');
               return done(null, results);
             }
           });
@@ -67,7 +60,7 @@
   getJobsLog = function(done) {
     var results;
     results = {};
-    return client.keys("bunny:log*", function(err, keys) {
+    return client.keys("" + bunny.prefix + ":log*", function(err, keys) {
       var count, key, total, _i, _len, _results;
       if (err || keys.length === 0) {
         return done(err);

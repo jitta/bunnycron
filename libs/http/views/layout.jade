@@ -27,22 +27,22 @@ html
               th FREQUENCY
               th LAST RUN
               th NEXT RUN
-              th Results
+              th RESULT
           tbody
             tr(ng-repeat="job in jobs")
               td.command  {{job.command}}
               td.schedule {{job.schedule}}
               td.last_run {{job.completed_at | date:'MMM dd HH:mm'}}
               td.next_run {{job.next_run | date:'MMM dd HH:mm'}}
-              td.log(ng-click="updateLog(job.id);showModal()") {{job.logs[0].substr(0,100)+'...'}}
+              td.log(ng-click="updateLog(job.id);showModal(job.logs[0].length)")
+                span {{job.logs[0].substr(0,100)}} <strong>...</strong>
               
         div.modal.fade.modal-logs(tabindex='-1', role='dialog', aria-labelledby='myLargeModalLabel', aria-hidden='true')
           div.logs(tabindex='-1', role='dialog', aria-labelledby='myLargeModalLabel', aria-hidden='true')
             div.modal-dialog.modal-lg
               div.modal-content
                 ul.list-group
-                  li.list-group-item(ng-repeat="log in logs track by $index")
-                    span {{log}}
+                  li.list-group-item(ng-repeat="log in logs track by $index" , ng-bind-html="log | to_trusted")
                     
   script(src='./js/angular.min.js')
   script(src='./js/main.js')

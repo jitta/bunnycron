@@ -4,7 +4,6 @@ exec = require("child_process").exec
 async = require('async')
 Worker = require('./worker')
 redis = require("./redis")
-crons = {}
 
 noop = ->
 
@@ -21,7 +20,7 @@ BunnyCron = (options) ->
   redis.reset()
   redis.createClient = @createRedisClient.bind(this)
   @client = Worker.client = redis.createClient()
-  Worker.prefix = @options.prefix
+  Worker.prefix = exports.prefix = @options.prefix
   @jobs = Cron.loadFile(@options.cronFile)
   @init()
   app: app or (app = require("./http"))
@@ -49,83 +48,79 @@ BunnyCron::createRedisClient =  ->
   return client
 
 BunnyCron::init = ->
-  @clearInactiveCron =>
-    @setCron()
+  async.parallel [
+    @clearInactiveJobs.bind(this)
+    @clearRunningJobs.bind(this)
+    @clearInactiveLogs.bind(this)
+    ], @createWorker.bind(this)
+  # async.parallel [@clearInactiveJobs.bind(this), @clearRunningJobs.bind(this)], ->
+    # console.log 'aaaaa'
 
-BunnyCron::clearInactiveCron = (callback)->
+### 
+When you changed jobs on Cronfile. Old jobs key won't deleted.
+###
+BunnyCron::clearInactiveJobs = (callback) ->
   self = this
   hash = @options.prefix + ":job*"
-  @client.keys hash, (err, results) ->
-    callback() if err? or results.length is 0
-    fns = []
-    total = results.length
+  @client.keys hash, (err, keys) =>
+    return callback() if err? or keys.length is 0
+    inactiveJobs = @filterInactiveJobs keys, @jobs
 
-    for result in results
-      id = result.split(":")[2]
-      do (id) ->
-        fns.push (done) ->
-          self.del id, "is_run", done
+    eachTaskFn = (id, done) ->
+      self.client.del id, done
 
-    async.parallel fns, (err,result)->
-      hash = "bunny:job:067856985fa00c05ed8681e2d63e0473"
-      console.log 'after clearInactiveCron'
-      self.client.hgetall hash, (err, result) ->
-        console.log result
-        console.log 'Clear active job complete'
-        callback()
-          
+    parallel inactiveJobs, eachTaskFn, callback
+    # parallel inactiveJobs, eachTaskFn, 
 
-BunnyCron::setCron = ->
-  job = @jobs[0]
-  new Worker(job)
-  # for job in @jobs
-    # console.log job
-
-BunnyCron::addCron = (job) ->
+BunnyCron::clearRunningJobs = (callback) ->
   self = this
-  cronText = "00 " + job.schedule
-  
-  # cronText = '*/10 ' + job.schedule;
-  # runCommand = ->
-  #   hash = self.options.prefix + ":job:" + job.id
-  #   self.client.hsetnx hash, "is_run", 1, (err, result) ->
-  #     if result is 1
-  #       console.log "Running command: " + job.schedule + " " + job.command
-  #       self.set job.id, "status", "active"
-  #       execFn = (error, stdout, stderr) ->
-  #         console.log "Run command completed", job.id
-  #         execResult =
-  #           error: error
-  #           stdout: stdout
-  #           stderr: stderr
+  hash = @options.prefix + ":job*"
+  @client.keys hash, (err, keys) ->
+    return callback() if err? or keys.length is 0
 
-  #         self.complete job.id, execResult
-  #         return
+    eachTaskFn = (key, done) ->
+      id = key.split(":")[2]
+      self.del id, "is_run", done
 
-  #       childs[job.id] = exec(job.command, execFn)
-  #       timeout = crons[job.id]._timeout._idleTimeout
-  #       killHangJob = ->
-  #         childs[job.id].kill "SIGINT"
-  #         self.complete job.id,
-  #           stdout: "Job has terminate by bunnycron from process timeout"
+    parallel keys, eachTaskFn, callback
 
-  #         return
+BunnyCron::clearInactiveLogs = (callback) ->
+  self = this
+  hash = @options.prefix + ":log*"
+  @client.keys hash, (err, keys) =>
+    return callback() if err? or keys.length is 0
+    inactiveJobs = @filterInactiveJobs keys, @jobs
 
-  #       setTimeout killHangJob, timeout - 1000
-  #     else
-  #       console.log "Cron was run, status still active"
-  #     return
+    eachTaskFn = (id, done) ->
+      self.client.del id, done
 
-  #   return
+    parallel inactiveJobs, eachTaskFn, callback
 
-  # crons[job.id] = new CronJob(cronText, runCommand, null, true)
-  # return
+BunnyCron::filterInactiveJobs = (keys, jobs) ->
+  return _.filter keys, (item) ->
+    id = item.split(':')[2]
+    return !(_.find(jobs,{id:id}))
+
+
+BunnyCron::createWorker = ->
+  # job = @jobs[0]
+  console.log 'createWorker'
+  for job in @jobs
+    new Worker(job)
+    # console.log job
 
 
 BunnyCron::del = (id, key, callback) ->
   hash = @options.prefix + ":job:" + id
   @client.hdel hash, key, callback or noop
 
+exports.parallel = parallel = (tasks, fn, done) ->
+    fns = []
+    for task in tasks
+      do (task) ->
+        fns.push (cb) -> fn task, cb
+
+    async.parallel fns, done
 
 exports.startCron = (options) ->
   BunnyCron.singleton = new BunnyCron(options)  unless BunnyCron.singleton

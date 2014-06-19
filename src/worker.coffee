@@ -8,12 +8,16 @@ class Worker
     @client = Worker.client
     @prefix = Worker.prefix
     console.log @job,'<<<@job'
+    @initStatus()
+
+  initStatus: ->
     @client.hmset @getKey(), @job, @runTask.bind(this)
 
   runTask: ->
-    # cronText = "00 " + @job.schedule
-    cronText = "*/5 " + @job.schedule
+    cronText = "00 " + @job.schedule
+    # cronText = "*/5 " + @job.schedule
     @cron = new CronJob(cronText, @runCommand.bind(this), null, true)
+    @set "next_run", @getNextRun()
 
 
   runCommand: ->
@@ -42,7 +46,7 @@ class Worker
   killActiveJob: ->
     @child.kill "SIGINT"
     console.log 'kill killActiveJob'
-    @complete stdout: "Job has terminate by bunnycron from process timeout"
+    # @complete stdout: "Job has terminate by bunnycron from process timeout"
 
   isActive: (callback) ->
     @client.hgetall @getKey(), (err, result) =>
@@ -60,8 +64,8 @@ class Worker
 
   complete: (data) ->
     log = data.stderr or data.stdout
-    log = log.replace('\n','\\n')
-    console.log log
+    # console.log log
+    console.log @getKey()
     
     if (data.stderr isnt "") or data.error
       status = "failed"
@@ -70,8 +74,7 @@ class Worker
     # console.log @job
     @set "status", status
     @set "completed_at", Date.now()
-    next_run = moment().add('milliseconds', @cron._timeout._idleTimeout).valueOf()
-    @set "next_run", next_run
+    @set "next_run", @getNextRun()
     @log log
     return
 
@@ -88,8 +91,10 @@ class Worker
 
   log: (log, callback) ->
     hash = @prefix + ':log:' + @job.id
-    console.log hash,log
     @client.multi().lpush(hash, log).ltrim(hash, 0, 20).exec()
+
+  getNextRun: ->
+    return moment().add('milliseconds', @cron._timeout._idleTimeout).valueOf()
 
   getKey: ->
     return @prefix + ':job:' + @job.id

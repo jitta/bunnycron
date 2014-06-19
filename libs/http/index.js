@@ -9,15 +9,9 @@
 
   moment = require('moment');
 
-  json = require('./routes/json');
-
   app = express();
 
   module.exports = app;
-
-  app.set("view options", {
-    doctype: "html"
-  });
 
   app.set("view engine", "jade");
 
@@ -27,15 +21,11 @@
 
   app.use(express.favicon());
 
-  app.use(app.router);
-
   app.use(express["static"](__dirname + "/public"));
 
   app.get('/stats', json.stats);
 
-  app.get('/jobs', json.jobs);
-
-  app.get("/", function(req, res) {
+  app.get("/bunny", function(req, res) {
     res.locals.moment = moment;
     return res.render("layout");
   });

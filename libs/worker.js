@@ -15,13 +15,18 @@
       this.client = Worker.client;
       this.prefix = Worker.prefix;
       console.log(this.job, '<<<@job');
-      this.client.hmset(this.getKey(), this.job, this.runTask.bind(this));
+      this.initStatus();
     }
+
+    Worker.prototype.initStatus = function() {
+      return this.client.hmset(this.getKey(), this.job, this.runTask.bind(this));
+    };
 
     Worker.prototype.runTask = function() {
       var cronText;
-      cronText = "*/5 " + this.job.schedule;
-      return this.cron = new CronJob(cronText, this.runCommand.bind(this), null, true);
+      cronText = "00 " + this.job.schedule;
+      this.cron = new CronJob(cronText, this.runCommand.bind(this), null, true);
+      return this.set("next_run", this.getNextRun());
     };
 
     Worker.prototype.runCommand = function() {
@@ -54,10 +59,7 @@
 
     Worker.prototype.killActiveJob = function() {
       this.child.kill("SIGINT");
-      console.log('kill killActiveJob');
-      return this.complete({
-        stdout: "Job has terminate by bunnycron from process timeout"
-      });
+      return console.log('kill killActiveJob');
     };
 
     Worker.prototype.isActive = function(callback) {
@@ -77,10 +79,9 @@
     };
 
     Worker.prototype.complete = function(data) {
-      var log, next_run, status;
+      var log, status;
       log = data.stderr || data.stdout;
-      log = log.replace('\n', '\\n');
-      console.log(log);
+      console.log(this.getKey());
       if ((data.stderr !== "") || data.error) {
         status = "failed";
       } else {
@@ -88,8 +89,7 @@
       }
       this.set("status", status);
       this.set("completed_at", Date.now());
-      next_run = moment().add('milliseconds', this.cron._timeout._idleTimeout).valueOf();
-      this.set("next_run", next_run);
+      this.set("next_run", this.getNextRun());
       this.log(log);
     };
 
@@ -110,8 +110,11 @@
     Worker.prototype.log = function(log, callback) {
       var hash;
       hash = this.prefix + ':log:' + this.job.id;
-      console.log(hash, log);
       return this.client.multi().lpush(hash, log).ltrim(hash, 0, 20).exec();
+    };
+
+    Worker.prototype.getNextRun = function() {
+      return moment().add('milliseconds', this.cron._timeout._idleTimeout).valueOf();
     };
 
     Worker.prototype.getKey = function() {

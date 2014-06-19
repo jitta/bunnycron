@@ -2,6 +2,7 @@ body .container .starter-template {
   margin-top:51px;
 
 }
-.log {
+td.log {
   width: 300px;
+  cursor:pointer;
 }

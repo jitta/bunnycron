@@ -1,11 +1,7 @@
 client = require("../../redis").createClient()
 async = require('async')
 _ = require('lodash')
-cron = require("../../cron")
-crons = cron.loadFile("examples/Cronfile")
-
-exports.jobs = (req, res) ->
-  res.json crons
+bunny = require("../../")
 
 
 exports.stats = (req, res) ->
@@ -22,7 +18,7 @@ exports.stats = (req, res) ->
 
 getJobsData = (done)->
   results = {}
-  client.keys "bunny:job*", (err, keys) ->
+  client.keys "#{bunny.prefix}:job*", (err, keys) ->
     return done err if err
     total = keys.length
     count = 0
@@ -33,13 +29,12 @@ getJobsData = (done)->
           id = key.split(':')[2]
           results[id] = item
           if count is total
-            console.log 'aaaaa'
             done null, results
 
 
 getJobsLog = (done) ->
   results = {}
-  client.keys "bunny:log*", (err, keys) ->
+  client.keys "#{bunny.prefix}:log*", (err, keys) ->
     return done err if err or keys.length is 0
     total = keys.length
     count = 0
