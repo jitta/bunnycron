@@ -5,7 +5,9 @@
   "keyword": [
     "schedule",
     "cron",
-    "cronjob"
+    "cronjob",
+    "worker",
+    "queue"
   ],
   "main": "index.js",
   "scripts": {
