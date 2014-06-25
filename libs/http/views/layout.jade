@@ -18,8 +18,8 @@ html
           a.navbar-brand(href='#') Bunny Cron
     .container(ng-controller="JobsCtrl")
       .starter-template
-        h1 [icon] Bunny Scheduler
         h2 Scheduled Jobs
+
         table.table.table-striped.jobs
           thead
             tr
@@ -32,17 +32,24 @@ html
             tr(ng-repeat="job in jobs")
               td.command  {{job.command}}
               td.schedule {{job.schedule}}
-              td.last_run {{job.completed_at | date:'MMM dd HH:mm'}}
-              td.next_run {{job.next_run | date:'MMM dd HH:mm'}}
-              td.log(ng-click="updateLog(job.id);showModal(job.logs[0].length)")
-                span {{job.logs[0].substr(0,100)}} <strong>...</strong>
+              td.last_run 
+                a(href='#', data-toggle='tooltip', title=" {{job.completed_at | date:'MMM dd H:mm' }}") {{job.completed_at | toUTCDate  }}
+              td.next_run
+                a(href='#', data-toggle='tooltip', title="{{ job.next_run | date:'MMM dd H:mm' }} ") {{job.next_run | toUTCDate}}
+              td.log(ng-click="updateLog(job.id);showModal(job.logs.length)")
+                span {{job.logs[0].data.substr(0,100)}} <strong>...</strong>
               
         div.modal.fade.modal-logs(tabindex='-1', role='dialog', aria-labelledby='myLargeModalLabel', aria-hidden='true')
           div.logs(tabindex='-1', role='dialog', aria-labelledby='myLargeModalLabel', aria-hidden='true')
             div.modal-dialog.modal-lg
               div.modal-content
                 ul.list-group
-                  li.list-group-item(ng-repeat="log in logs track by $index" , ng-bind-html="log | to_trusted")
-                    
+                  //- li.list-group-item(ng-repeat="log in logs track by $index" , ng-bind-html="log | jsonParse | to_trusted")
+                  li.list-group-item(ng-repeat="log in logs track by $index")
+                    div.panel.panel-default
+                      //- div.panel-heading {{log.completedAt | date: 'yyyy-MM-dd HH:mm:ss Z'}}
+                      div.panel-heading {{log.completedAt | toUTCDate }}
+                      div.panel-body( ng-bind-html="log.data | to_trusted")
+
   script(src='./js/angular.min.js')
   script(src='./js/main.js')

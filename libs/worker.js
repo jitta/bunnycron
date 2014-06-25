@@ -14,7 +14,6 @@
       this.job = job;
       this.client = Worker.client;
       this.prefix = Worker.prefix;
-      console.log(this.job, '<<<@job');
       this.initStatus();
     }
 
@@ -23,9 +22,7 @@
     };
 
     Worker.prototype.runTask = function() {
-      var cronText;
-      cronText = "00 " + this.job.schedule;
-      this.cron = new CronJob(cronText, this.runCommand.bind(this), null, true);
+      this.cron = new CronJob(this.job.schedule, this.runCommand.bind(this), null, true);
       return this.set("next_run", this.getNextRun());
     };
 
@@ -81,7 +78,6 @@
     Worker.prototype.complete = function(data) {
       var log, status;
       log = data.stderr || data.stdout;
-      console.log(this.getKey());
       if ((data.stderr !== "") || data.error) {
         status = "failed";
       } else {
@@ -108,9 +104,13 @@
     };
 
     Worker.prototype.log = function(log, callback) {
-      var hash;
+      var hash, logObj;
+      logObj = {
+        completedAt: Date.now(),
+        data: log
+      };
       hash = this.prefix + ':log:' + this.job.id;
-      return this.client.multi().lpush(hash, log).ltrim(hash, 0, 20).exec();
+      return this.client.multi().lpush(hash, JSON.stringify(logObj)).ltrim(hash, 0, 20).exec();
     };
 
     Worker.prototype.getNextRun = function() {

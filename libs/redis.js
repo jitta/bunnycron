@@ -34,18 +34,6 @@
 
 
   /*
-  Return the pubsub-specific redis client.
-  
-  @return {RedisClient}
-  @api private
-   */
-
-  exports.pubsubClient = function() {
-    return exports._pubsub || (exports._pubsub = exports.createClient());
-  };
-
-
-  /*
   Resets internal variables to initial state
   
   @api private

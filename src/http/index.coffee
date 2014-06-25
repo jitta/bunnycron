@@ -1,6 +1,7 @@
 express = require("express")
 json = require("./routes/json")
 client = require("../redis").createClient()
+console.log (require('../../'))
 moment = require('moment')
 
 app = express()

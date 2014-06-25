@@ -24,16 +24,6 @@ exports.client = ->
 
 
 ###
-Return the pubsub-specific redis client.
-
-@return {RedisClient}
-@api private
-###
-exports.pubsubClient = ->
-  exports._pubsub or (exports._pubsub = exports.createClient())
-
-
-###
 Resets internal variables to initial state
 
 @api private

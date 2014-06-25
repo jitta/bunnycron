@@ -17,8 +17,8 @@
     for (_i = 0, _len = lines.length; _i < _len; _i++) {
       line = lines[_i];
       cols = line.split(" ");
-      schedule = cols.slice(0, 5).join(" ");
-      command = cols.slice(5).join(" ");
+      schedule = cols.slice(0, 6).join(" ");
+      command = cols.slice(6).join(" ");
       if (command === "") {
         continue;
       }

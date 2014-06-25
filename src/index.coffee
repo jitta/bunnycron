@@ -4,6 +4,7 @@ exec = require("child_process").exec
 async = require('async')
 Worker = require('./worker')
 redis = require("./redis")
+app = undefined
 
 noop = ->
 
@@ -16,7 +17,7 @@ BunnyCron = (options) ->
     cronFile: "Cronfile"
     prefix: "bunny"
   @options = _.merge(defaults, options)
-  
+
   redis.reset()
   redis.createClient = @createRedisClient.bind(this)
   @client = Worker.client = redis.createClient()
@@ -28,7 +29,6 @@ BunnyCron = (options) ->
 
 exports = module.exports = BunnyCron
 exports.version = require("../package.json").version
-app = undefined
 
 Object.defineProperty exports, "app",
   get: ->
@@ -40,10 +40,9 @@ BunnyCron::createRedisClient =  ->
   port = @options.redis.port or 6379
   host = @options.redis.host or "127.0.0.1"
   client = require('redis').createClient(port, host, @options.redis.options)
-  client.auth @options.redis.auth  if @options.redis.auth
+  client.auth @options.redis.auth if @options.redis.auth
   client.on "error", (err) ->
-    console.log err
-    return
+    console.log 'Bunnycron connected redis error: '+err
 
   return client
 
@@ -104,10 +103,11 @@ BunnyCron::filterInactiveJobs = (keys, jobs) ->
 
 BunnyCron::createWorker = ->
   # job = @jobs[0]
-  console.log 'createWorker'
+  # job = @jobs[0]
+  # new Worker(job)
+  # console.log 'createWorker'
   for job in @jobs
     new Worker(job)
-    # console.log job
 
 
 BunnyCron::del = (id, key, callback) ->

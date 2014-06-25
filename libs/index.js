@@ -13,10 +13,12 @@
 
   redis = require("./redis");
 
+  app = void 0;
+
   noop = function() {};
 
   BunnyCron = function(options) {
-    var app, defaults, self;
+    var defaults, self;
     self = this;
     options = options || {};
     this.cronList = [];
@@ -41,8 +43,6 @@
 
   exports.version = require("../package.json").version;
 
-  app = void 0;
-
   Object.defineProperty(exports, "app", {
     get: function() {
       return app || (app = require("./http"));
@@ -62,7 +62,7 @@
       client.auth(this.options.redis.auth);
     }
     client.on("error", function(err) {
-      console.log(err);
+      return console.log('Bunnycron connected redis error: ' + err);
     });
     return client;
   };
@@ -144,7 +144,6 @@
 
   BunnyCron.prototype.createWorker = function() {
     var job, _i, _len, _ref, _results;
-    console.log('createWorker');
     _ref = this.jobs;
     _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {

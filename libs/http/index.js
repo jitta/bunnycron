@@ -7,6 +7,8 @@
 
   client = require("../redis").createClient();
 
+  console.log(require('../../'));
+
   moment = require('moment');
 
   app = express();

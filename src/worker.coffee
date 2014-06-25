@@ -7,16 +7,15 @@ class Worker
   constructor: (@job) ->
     @client = Worker.client
     @prefix = Worker.prefix
-    console.log @job,'<<<@job'
+    # console.log @job,'<<<@job'
     @initStatus()
 
   initStatus: ->
     @client.hmset @getKey(), @job, @runTask.bind(this)
 
   runTask: ->
-    cronText = "00 " + @job.schedule
-    # cronText = "*/5 " + @job.schedule
-    @cron = new CronJob(cronText, @runCommand.bind(this), null, true)
+    # console.log @job.schedule
+    @cron = new CronJob(@job.schedule, @runCommand.bind(this), null, true)
     @set "next_run", @getNextRun()
 
 
@@ -64,8 +63,6 @@ class Worker
 
   complete: (data) ->
     log = data.stderr or data.stdout
-    # console.log log
-    console.log @getKey()
     
     if (data.stderr isnt "") or data.error
       status = "failed"
@@ -90,8 +87,11 @@ class Worker
     @client.hget @getKey(), key, callback
 
   log: (log, callback) ->
+    logObj =
+      completedAt: Date.now()
+      data: log
     hash = @prefix + ':log:' + @job.id
-    @client.multi().lpush(hash, log).ltrim(hash, 0, 20).exec()
+    @client.multi().lpush(hash, JSON.stringify(logObj)).ltrim(hash, 0, 20).exec()
 
   getNextRun: ->
     return moment().add('milliseconds', @cron._timeout._idleTimeout).valueOf()

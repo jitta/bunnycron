@@ -8,8 +8,8 @@ Cron.loadFile = (file, callback) ->
   lines = data.split("\n")
   for line in lines
     cols = line.split(" ")
-    schedule = cols.slice(0, 5).join(" ")
-    command = cols.slice(5).join(" ")
+    schedule = cols.slice(0, 6).join(" ")
+    command = cols.slice(6).join(" ")
     continue  if command is ""
     job =
       id: makeJobId(line)

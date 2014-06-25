@@ -38,7 +38,6 @@ getJobsLog = (done) ->
     return done err if err or keys.length is 0
     total = keys.length
     count = 0
-
     for key in keys
       do (key) ->
         client.lrange key, 0, -1, (err, item) ->
