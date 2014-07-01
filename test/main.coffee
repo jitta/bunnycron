@@ -1,4 +1,3 @@
-Bunny = require('../')
 should = require('should');
 spawn = require("child_process").spawn
 sinon = require 'sinon'
@@ -10,9 +9,10 @@ describe 'Initialize', ->
   afterEach (done) -> redisHelper.flushAll done
 
   it 'Should throw error when not found Cronfile', ->
-    ( -> Bunny.startCron()).should.throw();
+    bunny = require('../')()
+    ( -> bunny.startCron()).should.throw(/no such file or directory/)
 
-  it 'Should run once time per cron when run node multiple instance', (done) ->
+  it.skip 'Should run once time per cron when run node multiple instance', (done) ->
 
     datas = 
       child0: []
@@ -45,6 +45,13 @@ describe 'Initialize', ->
       done()
 
     setTimeout checkStdout, 1000 * 65
+
+  it 'Should throw error when cron pattern invalid', ->
+    config = 
+      cronFile: 'test/fixture/invalid_cron'
+    bunny = require('../')(config)
+    ( -> bunny.startCron()).should.throw(/Cron pattern not valid/);
+
 
     
 

@@ -1,11 +1,13 @@
 (function() {
-  var Cron, cron, crypto, fs, makeJobId;
+  var Cron, CronJob, cron, crypto, fs, isValidCron, makeJobId;
 
   cron = require("cron");
 
   fs = require("fs");
 
   crypto = require("crypto");
+
+  CronJob = require("cron").CronJob;
 
   module.exports = Cron = {};
 
@@ -22,14 +24,29 @@
       if (command === "") {
         continue;
       }
-      job = {
-        id: makeJobId(line),
-        schedule: schedule,
-        command: command
-      };
-      Jobs.push(job);
+      if (isValidCron(schedule)) {
+        job = {
+          id: makeJobId(line),
+          schedule: schedule,
+          command: command
+        };
+        Jobs.push(job);
+      } else {
+        throw new Error("Cron pattern not valid: " + schedule + " \n Use valid pattern 00 30 11 * * 1-5");
+      }
     }
     return Jobs;
+  };
+
+  isValidCron = function(cronTime) {
+    var e;
+    try {
+      new CronJob(cronTime, function() {});
+    } catch (_error) {
+      e = _error;
+      return false;
+    }
+    return true;
   };
 
   makeJobId = function(command) {

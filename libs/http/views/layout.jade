@@ -29,13 +29,15 @@ html
               th NEXT RUN
               th RESULT
           tbody
+            tr(ng-show="jobs == null")
+              td(colspan="5", align="center") {{jobs}} Not found scheduled, Please add to Cronfile
             tr(ng-repeat="job in jobs")
               td.command  {{job.command}}
               td.schedule {{job.schedule}}
-              td.last_run 
-                a(href='#', data-toggle='tooltip', title=" {{job.completed_at | date:'MMM dd H:mm' }}") {{job.completed_at | toUTCDate  }}
+              td.last_run
+                a(href='#', ng-show="{{job.completed_at}}", data-toggle='tooltip', title=" {{job.completed_at | date:'MMM dd H:mm Z' }}", ng-if="job.completed_at") {{ job.completed_at | toUTCDate  }}
               td.next_run
-                a(href='#', data-toggle='tooltip', title="{{ job.next_run | date:'MMM dd H:mm' }} ") {{job.next_run | toUTCDate}}
+                a(href='#', data-toggle='tooltip', title="{{ job.next_run | date:'MMM dd H:mm Z' }} ") {{job.next_run | toUTCDate}}
               td.log(ng-click="updateLog(job.id);showModal(job.logs.length)")
                 span {{job.logs[0].data.substr(0,100)}} <strong>...</strong>
               
@@ -44,10 +46,8 @@ html
             div.modal-dialog.modal-lg
               div.modal-content
                 ul.list-group
-                  //- li.list-group-item(ng-repeat="log in logs track by $index" , ng-bind-html="log | jsonParse | to_trusted")
                   li.list-group-item(ng-repeat="log in logs track by $index")
                     div.panel.panel-default
-                      //- div.panel-heading {{log.completedAt | date: 'yyyy-MM-dd HH:mm:ss Z'}}
                       div.panel-heading {{log.completedAt | toUTCDate }}
                       div.panel-body( ng-bind-html="log.data | to_trusted")
 

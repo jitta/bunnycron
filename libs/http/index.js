@@ -1,5 +1,5 @@
 (function() {
-  var app, client, express, json, moment;
+  var app, bunny, client, express, json, moment;
 
   express = require("express");
 
@@ -7,29 +7,26 @@
 
   client = require("../redis").createClient();
 
-  console.log(require('../../'));
+  bunny = require('../../');
 
   moment = require('moment');
 
   app = express();
 
-  module.exports = app;
-
-  app.set("view engine", "jade");
-
-  app.set("views", __dirname + "/views");
-
-  app.set("title", "Bunny");
-
-  app.use(express.favicon());
-
-  app.use(express["static"](__dirname + "/public"));
-
-  app.get('/stats', json.stats);
-
-  app.get("/bunny", function(req, res) {
-    res.locals.moment = moment;
-    return res.render("layout");
-  });
+  module.exports = function() {
+    var baseUrl;
+    baseUrl = bunny.options.baseUrl;
+    app.set("view engine", "jade");
+    app.set("views", __dirname + "/views");
+    app.set("title", "Bunny");
+    app.use(express.favicon());
+    app.use(express["static"](__dirname + "/public"));
+    app.get("" + baseUrl + "stats", json.stats);
+    app.get("/bunnyconfigs", json.configs);
+    return app.get("" + (baseUrl.slice(0, -1)), function(req, res) {
+      res.locals.moment = moment;
+      return res.render("layout");
+    });
+  };
 
 }).call(this);

@@ -9,30 +9,36 @@ app = undefined
 noop = ->
 
 
-BunnyCron = (options) ->
+BunnyCron =  ->
   self = this
-  options = options or {}
-  @cronList = []
-  defaults =
-    cronFile: "Cronfile"
-    prefix: "bunny"
-  @options = _.merge(defaults, options)
+  @options = exports.options
 
   redis.reset()
   redis.createClient = @createRedisClient.bind(this)
   @client = Worker.client = redis.createClient()
+
   Worker.prefix = exports.prefix = @options.prefix
   @jobs = Cron.loadFile(@options.cronFile)
   @init()
-  app: app or (app = require("./http"))
   bunny: self
 
-exports = module.exports = BunnyCron
+exports = module.exports = (options = {} ) ->
+  defaults =
+    cronFile: "Cronfile"
+    prefix: "bunny"
+    baseUrl: '/bunny'
+
+  options = _.merge(defaults, options)
+  options.baseUrl = sanitizeUrl options.baseUrl
+  exports.options = options
+  exports.app = require("./http")()
+  return exports
+
 exports.version = require("../package.json").version
 
-Object.defineProperty exports, "app",
-  get: ->
-    app or (app = require("./http"))
+# Object.defineProperty exports, "app",
+#   get: ->
+#     app or (app = require("./http"))
 
 BunnyCron::createRedisClient =  ->
   @options.redis = {} unless @options.redis?
@@ -52,8 +58,6 @@ BunnyCron::init = ->
     @clearRunningJobs.bind(this)
     @clearInactiveLogs.bind(this)
     ], @createWorker.bind(this)
-  # async.parallel [@clearInactiveJobs.bind(this), @clearRunningJobs.bind(this)], ->
-    # console.log 'aaaaa'
 
 ### 
 When you changed jobs on Cronfile. Old jobs key won't deleted.
@@ -108,6 +112,15 @@ BunnyCron::createWorker = ->
   # console.log 'createWorker'
   for job in @jobs
     new Worker(job)
+
+# / -> /
+# /sadsad -> /saad/
+
+sanitizeUrl = (url) ->
+  if url.length > 0 and url[url.length-1] isnt '/'
+    url += '/'
+
+  return url
 
 
 BunnyCron::del = (id, key, callback) ->

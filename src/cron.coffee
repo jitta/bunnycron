@@ -1,6 +1,8 @@
 cron = require("cron")
 fs = require("fs")
 crypto = require("crypto")
+CronJob = require("cron").CronJob
+
 module.exports = Cron = {}
 Cron.loadFile = (file, callback) ->
   Jobs = []
@@ -11,14 +13,27 @@ Cron.loadFile = (file, callback) ->
     schedule = cols.slice(0, 6).join(" ")
     command = cols.slice(6).join(" ")
     continue  if command is ""
-    job =
-      id: makeJobId(line)
-      schedule: schedule
-      command: command
+    if isValidCron schedule
 
-    Jobs.push job
+      job =
+        id: makeJobId(line)
+        schedule: schedule
+        command: command
+
+      Jobs.push job
+    else
+      throw new Error "Cron pattern not valid: #{schedule} \n Use valid pattern 00 30 11 * * 1-5"
 
   return Jobs
+
+isValidCron = (cronTime) ->
+  try
+    new CronJob cronTime, ->
+  catch e
+    return false
+
+  return true
+  
 
 makeJobId = (command) ->
   require("crypto").createHash("md5").update(command).digest "hex"

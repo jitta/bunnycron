@@ -1,5 +1,5 @@
 (function() {
-  var BunnyCron, Cron, Worker, app, async, exec, exports, noop, parallel, redis, _;
+  var BunnyCron, Cron, Worker, app, async, exec, exports, noop, parallel, redis, sanitizeUrl, _;
 
   Cron = require("./cron");
 
@@ -17,16 +17,10 @@
 
   noop = function() {};
 
-  BunnyCron = function(options) {
-    var defaults, self;
+  BunnyCron = function() {
+    var self;
     self = this;
-    options = options || {};
-    this.cronList = [];
-    defaults = {
-      cronFile: "Cronfile",
-      prefix: "bunny"
-    };
-    this.options = _.merge(defaults, options);
+    this.options = exports.options;
     redis.reset();
     redis.createClient = this.createRedisClient.bind(this);
     this.client = Worker.client = redis.createClient();
@@ -34,20 +28,28 @@
     this.jobs = Cron.loadFile(this.options.cronFile);
     this.init();
     return {
-      app: app || (app = require("./http")),
       bunny: self
     };
   };
 
-  exports = module.exports = BunnyCron;
+  exports = module.exports = function(options) {
+    var defaults;
+    if (options == null) {
+      options = {};
+    }
+    defaults = {
+      cronFile: "Cronfile",
+      prefix: "bunny",
+      baseUrl: '/bunny'
+    };
+    options = _.merge(defaults, options);
+    options.baseUrl = sanitizeUrl(options.baseUrl);
+    exports.options = options;
+    exports.app = require("./http")();
+    return exports;
+  };
 
   exports.version = require("../package.json").version;
-
-  Object.defineProperty(exports, "app", {
-    get: function() {
-      return app || (app = require("./http"));
-    }
-  });
 
   BunnyCron.prototype.createRedisClient = function() {
     var client, host, port, self;
@@ -151,6 +153,13 @@
       _results.push(new Worker(job));
     }
     return _results;
+  };
+
+  sanitizeUrl = function(url) {
+    if (url.length > 0 && url[url.length - 1] !== '/') {
+      url += '/';
+    }
+    return url;
   };
 
   BunnyCron.prototype.del = function(id, key, callback) {

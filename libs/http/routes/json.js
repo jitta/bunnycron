@@ -1,5 +1,5 @@
 (function() {
-  var async, bunny, client, getJobsData, getJobsLog, _;
+  var async, bunny, client, getJobsData, getJobsLog, prefix, _;
 
   client = require("../../redis").createClient();
 
@@ -8,6 +8,12 @@
   _ = require('lodash');
 
   bunny = require("../../");
+
+  prefix = bunny.options.prefix;
+
+  exports.configs = function(req, res) {
+    return res.json(bunny.options);
+  };
 
   exports.stats = function(req, res) {
     return async.parallel({
@@ -31,9 +37,9 @@
   getJobsData = function(done) {
     var results;
     results = {};
-    return client.keys("" + bunny.prefix + ":job*", function(err, keys) {
+    return client.keys("" + prefix + ":job*", function(err, keys) {
       var count, key, total, _i, _len, _results;
-      if (err) {
+      if (err || keys.length === 0) {
         return done(err);
       }
       total = keys.length;
@@ -60,7 +66,7 @@
   getJobsLog = function(done) {
     var results;
     results = {};
-    return client.keys("" + bunny.prefix + ":log*", function(err, keys) {
+    return client.keys("" + prefix + ":log*", function(err, keys) {
       var count, key, total, _i, _len, _results;
       if (err || keys.length === 0) {
         return done(err);

@@ -2,33 +2,47 @@
 var app = angular.module('bunny', []);
 var $modal = $('.modal-logs');
 
+app.run(function ($rootScope, $http) {
+  $http.get('/bunnyconfigs').success(function (data) {
+    $rootScope.configs = data;
+    $rootScope.$emit('loadconfigs');
+    
+  })
+});
+
 
 function formatLog (data) {
   for (var id in data) {
     var item = data[id];
-    // console.log(item)
-    for (var i = item.logs.length - 1; i >= 0; i--) {
-      var log = item.logs[i];
-      // console.log(log,'<<<<')
-      data[id].logs[i] = JSON.parse(log);
-    };
+    if (item.logs) {
+      for (var i = item.logs.length - 1; i >= 0; i--) {
+        var log = item.logs[i];
+        data[id].logs[i] = JSON.parse(log)
+      };
+    }
   }
 }
 
 app.controller("JobsCtrl", function($scope, $http, $rootScope,$sce){
-  $scope.logs = [];
   function getJobs () {
-    $http.get('/stats').success(function (data) {
+    var baseUrl = $rootScope.configs.baseUrl;
+    $http.get(baseUrl + 'stats').success(function (data) {
+      if (Object.keys(data).length == 0) {
+        data = null;
+      }
       formatLog(data);
       $scope.jobs = data;
 
     });
   };
-  getJobs()
-  setInterval(getJobs,2000);
+  $rootScope.$on('loadconfigs',function(){
+    getJobs()
+    setInterval(getJobs, 2000);
+    
+  });
+  $scope.logs = [];
     
   $scope.updateLog = function (id) {
-    console.log($scope.jobs[id].logs)
     $scope.logs = $scope.jobs[id].logs
   }
 
@@ -41,7 +55,6 @@ app.controller("JobsCtrl", function($scope, $http, $rootScope,$sce){
 
 app.filter('toUTCDate', function(){
   return function(time) {
-    console.log(time)
     time = JSON.parse(time); //invalid date if time is string
     return moment(time).utc().format('MMM DD HH:mm UTC')
   };

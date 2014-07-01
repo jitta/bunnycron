@@ -2,7 +2,10 @@ client = require("../../redis").createClient()
 async = require('async')
 _ = require('lodash')
 bunny = require("../../")
+prefix = bunny.options.prefix
 
+exports.configs = (req, res) ->
+  res.json bunny.options
 
 exports.stats = (req, res) ->
   async.parallel
@@ -15,11 +18,10 @@ exports.stats = (req, res) ->
       _results[id].logs = results.logs[id] if results.logs?[id]?
 
     res.json _results
-
 getJobsData = (done)->
   results = {}
-  client.keys "#{bunny.prefix}:job*", (err, keys) ->
-    return done err if err
+  client.keys "#{prefix}:job*", (err, keys) ->
+    return done err if err or keys.length is 0
     total = keys.length
     count = 0
     for key in keys
@@ -34,7 +36,7 @@ getJobsData = (done)->
 
 getJobsLog = (done) ->
   results = {}
-  client.keys "#{bunny.prefix}:log*", (err, keys) ->
+  client.keys "#{prefix}:log*", (err, keys) ->
     return done err if err or keys.length is 0
     total = keys.length
     count = 0
