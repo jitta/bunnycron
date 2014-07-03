@@ -1,7 +1,7 @@
-client = require("../../redis").createClient()
 async = require('async')
 _ = require('lodash')
 bunny = require("../../")
+client = bunny.client
 prefix = bunny.options.prefix
 
 exports.configs = (req, res) ->

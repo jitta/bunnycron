@@ -1,11 +1,9 @@
 (function() {
-  var app, bunny, client, express, json, moment;
+  var app, bunny, express, json, moment;
 
   express = require("express");
 
   json = require("./routes/json");
-
-  client = require("../redis").createClient();
 
   bunny = require('../../');
 

@@ -1,7 +1,6 @@
 express = require("express")
 json = require("./routes/json")
-client = require("../redis").createClient()
-bunny = (require('../../'))
+bunny = require('../../')
 moment = require('moment')
 app = express()
 # expose the app

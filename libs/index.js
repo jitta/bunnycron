@@ -1,5 +1,5 @@
 (function() {
-  var BunnyCron, Cron, Worker, app, async, exec, exports, noop, parallel, redis, sanitizeUrl, _;
+  var BunnyCron, Cron, Worker, app, async, client, exec, exports, noop, parallel, redis, sanitizeUrl, _;
 
   Cron = require("./cron");
 
@@ -15,15 +15,15 @@
 
   app = void 0;
 
+  client = void 0;
+
   noop = function() {};
 
   BunnyCron = function() {
     var self;
     self = this;
     this.options = exports.options;
-    redis.reset();
-    redis.createClient = this.createRedisClient.bind(this);
-    this.client = Worker.client = redis.createClient();
+    this.client = client;
     Worker.prefix = exports.prefix = this.options.prefix;
     this.jobs = Cron.loadFile(this.options.cronFile);
     this.init();
@@ -45,29 +45,31 @@
     options = _.merge(defaults, options);
     options.baseUrl = sanitizeUrl(options.baseUrl);
     exports.options = options;
+    Worker.prefix = exports.prefix = options.prefix;
+    redis.reset();
+    redis.createClient = function() {
+      var host, port, self;
+      if (options.redis == null) {
+        options.redis = {};
+      }
+      self = this;
+      port = options.redis.port || 6379;
+      host = options.redis.host || "127.0.0.1";
+      client = require('redis').createClient(port, host, options.redis.options);
+      if (options.redis.auth) {
+        client.auth(options.redis.auth);
+      }
+      client.on("error", function(err) {
+        return console.log('Bunnycron connected redis error: ' + err);
+      });
+      return client;
+    };
+    Worker.client = exports.client = redis.createClient();
     exports.app = require("./http")();
     return exports;
   };
 
   exports.version = require("../package.json").version;
-
-  BunnyCron.prototype.createRedisClient = function() {
-    var client, host, port, self;
-    if (this.options.redis == null) {
-      this.options.redis = {};
-    }
-    self = this;
-    port = this.options.redis.port || 6379;
-    host = this.options.redis.host || "127.0.0.1";
-    client = require('redis').createClient(port, host, this.options.redis.options);
-    if (this.options.redis.auth) {
-      client.auth(this.options.redis.auth);
-    }
-    client.on("error", function(err) {
-      return console.log('Bunnycron connected redis error: ' + err);
-    });
-    return client;
-  };
 
   BunnyCron.prototype.init = function() {
     return async.parallel([this.clearInactiveJobs.bind(this), this.clearRunningJobs.bind(this), this.clearInactiveLogs.bind(this)], this.createWorker.bind(this));

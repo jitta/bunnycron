@@ -5,6 +5,7 @@ async = require('async')
 Worker = require('./worker')
 redis = require("./redis")
 app = undefined
+client = undefined
 
 noop = ->
 
@@ -13,9 +14,7 @@ BunnyCron =  ->
   self = this
   @options = exports.options
 
-  redis.reset()
-  redis.createClient = @createRedisClient.bind(this)
-  @client = Worker.client = redis.createClient()
+  @client = client
 
   Worker.prefix = exports.prefix = @options.prefix
   @jobs = Cron.loadFile(@options.cronFile)
@@ -31,7 +30,26 @@ exports = module.exports = (options = {} ) ->
   options = _.merge(defaults, options)
   options.baseUrl = sanitizeUrl options.baseUrl
   exports.options = options
+  Worker.prefix = exports.prefix = options.prefix
+  redis.reset()
+  redis.createClient = ->
+    options.redis = {} unless options.redis?
+    self = this
+    port = options.redis.port or 6379
+    host = options.redis.host or "127.0.0.1"
+    client = require('redis').createClient(port, host, options.redis.options)
+    client.auth options.redis.auth if options.redis.auth
+    client.on "error", (err) ->
+      console.log 'Bunnycron connected redis error: '+err
+
+    return client
+    
+  Worker.client = exports.client = redis.createClient()
   exports.app = require("./http")()
+
+
+
+
   return exports
 
 exports.version = require("../package.json").version
@@ -40,17 +58,6 @@ exports.version = require("../package.json").version
 #   get: ->
 #     app or (app = require("./http"))
 
-BunnyCron::createRedisClient =  ->
-  @options.redis = {} unless @options.redis?
-  self = this
-  port = @options.redis.port or 6379
-  host = @options.redis.host or "127.0.0.1"
-  client = require('redis').createClient(port, host, @options.redis.options)
-  client.auth @options.redis.auth if @options.redis.auth
-  client.on "error", (err) ->
-    console.log 'Bunnycron connected redis error: '+err
-
-  return client
 
 BunnyCron::init = ->
   async.parallel [
@@ -113,8 +120,6 @@ BunnyCron::createWorker = ->
   for job in @jobs
     new Worker(job)
 
-# / -> /
-# /sadsad -> /saad/
 
 sanitizeUrl = (url) ->
   if url.length > 0 and url[url.length-1] isnt '/'
