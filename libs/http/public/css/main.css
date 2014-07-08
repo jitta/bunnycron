@@ -2,7 +2,19 @@ body .container .starter-template {
   margin-top:51px;
 
 }
+
 td.log {
   width: 300px;
   cursor:pointer;
 }
+.status.glyphicon-ok {
+  color: green;
+}
+
+.status.glyphicon-remove {
+  color: red;
+}
+
+.status.glyphicon-warning-sign {
+  color: orange;
+} 

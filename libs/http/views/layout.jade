@@ -23,6 +23,7 @@ html
         table.table.jobs
           thead
             tr
+              th
               th TASK
               th FREQUENCY
               th LAST RUN
@@ -31,8 +32,18 @@ html
           tbody
             tr(ng-show="jobs == null")
               td(colspan="5", align="center") {{jobs}} Not found scheduled, Please add to Cronfile
-            tr(ng-repeat="job in jobs", ng-class="getStatusClass(job.status)")
-              td.command 
+            tr(ng-repeat="job in jobs")
+              td
+                .animate-switch-container(ng-switch='', on='job.status')
+                  .animate-switch(ng-switch-when='failed')
+                    span.status.glyphicon.glyphicon-remove
+                  .animate-switch(ng-switch-when='completed') 
+                    span.status.glyphicon.glyphicon-ok
+                  .animate-switch(ng-switch-when='timeout') 
+                    span.status.glyphicon.glyphicon-warning-sign(data-toggle="tooltip",data-placement="top", title="Job has terminate by bunnycron from process timeout")
+                  .animate-switch(ng-switch-default='')
+
+              td.command
                 span {{job.command}} 
                 img(src="/img/preloader.gif", width=30, height=10, ng-show="job.is_run")
               td.schedule {{job.schedule}}
