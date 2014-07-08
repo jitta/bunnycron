@@ -27,25 +27,24 @@
     };
 
     Worker.prototype.runCommand = function() {
-      console.log('runCommand');
       return this.isActive((function(_this) {
         return function(err, isActive) {
           var timeout;
           console.log(isActive, 'isActive');
-          if (isActive) {
-            return console.log("Cron was run, status still active");
-          } else {
+          if (isActive === false) {
             console.log("Running command: " + _this.job.schedule + " " + _this.job.command);
-            _this.set("status", "active");
             _this.child = exec(_this.job.command, function(error, stdout, stderr) {
-              var execResult;
+              var execResult, status;
               console.log("Run command completed: " + _this.job.schedule + " " + _this.job.command);
+              if (error != null ? error.killed : void 0) {
+                status = 'timeout';
+              }
               execResult = {
                 error: error,
                 stdout: stdout,
                 stderr: stderr
               };
-              return _this.complete(execResult);
+              return _this.complete(execResult, status);
             });
             timeout = _this.cron._timeout._idleTimeout;
             return setTimeout(_this.killActiveJob.bind(_this), timeout - 1000);
@@ -56,36 +55,37 @@
 
     Worker.prototype.killActiveJob = function() {
       this.child.kill("SIGINT");
-      return console.log('kill killActiveJob');
+      return console.log("Job has terminate by bunnycron from process timeout");
     };
 
     Worker.prototype.isActive = function(callback) {
-      return this.client.hgetall(this.getKey(), (function(_this) {
-        return function(err, result) {
-          console.log(result, '<<<<<<<');
-          return _this.client.hsetnx(_this.getKey(), "is_run", 'running', function(err, is_run) {
-            console.log(err, is_run);
-            if (is_run === 1) {
-              return callback(null, false);
-            } else {
-              return callback(null, false);
-            }
-          });
-        };
-      })(this));
+      return this.client.hsetnx(this.getKey(), "is_run", 'running', function(err, is_run) {
+        if (err) {
+          return callback(err);
+        } else {
+          if (is_run === 1) {
+            return callback(null, false);
+          } else {
+            return callback(null, true);
+          }
+        }
+      });
     };
 
-    Worker.prototype.complete = function(data) {
-      var log, status;
+    Worker.prototype.complete = function(data, status) {
+      var log;
       log = data.stderr || data.stdout;
-      if ((data.stderr !== "") || data.error) {
-        status = "failed";
-      } else {
-        status = "completed";
+      if (!status) {
+        if ((data.stderr !== "") || data.error) {
+          status = "failed";
+        } else {
+          status = "completed";
+        }
       }
       this.set("status", status);
       this.set("completed_at", Date.now());
       this.set("next_run", this.getNextRun());
+      this.del("is_run");
       this.log(log);
     };
 

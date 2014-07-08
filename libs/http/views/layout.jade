@@ -20,7 +20,7 @@ html
       .starter-template
         h2 Scheduled Jobs
 
-        table.table.table-striped.jobs
+        table.table.jobs
           thead
             tr
               th TASK
@@ -31,8 +31,10 @@ html
           tbody
             tr(ng-show="jobs == null")
               td(colspan="5", align="center") {{jobs}} Not found scheduled, Please add to Cronfile
-            tr(ng-repeat="job in jobs")
-              td.command  {{job.command}}
+            tr(ng-repeat="job in jobs", ng-class="getStatusClass(job.status)")
+              td.command 
+                span {{job.command}} 
+                img(src="/img/preloader.gif", width=30, height=10, ng-show="job.is_run")
               td.schedule {{job.schedule}}
               td.last_run
                 a(href='#', ng-show="{{job.completed_at}}", data-toggle='tooltip', title=" {{job.completed_at | date:'MMM dd H:mm Z' }}", ng-if="job.completed_at") {{ job.completed_at | toUTCDate  }}

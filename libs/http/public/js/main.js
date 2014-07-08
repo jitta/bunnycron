@@ -35,6 +35,24 @@ app.controller("JobsCtrl", function($scope, $http, $rootScope,$sce){
 
     });
   };
+  $scope.getStatusClass = function (status) {
+    var statusClass;
+    switch (status) {
+      case 'failed': 
+        statusClass = 'danger'
+        break;
+      case 'completed':
+        statusClass = 'success'
+        break;
+      case 'timeout': 
+        statusClass = 'warning'
+        break;
+      default:
+        statusClass = ''
+    }
+    return statusClass
+  }
+
   $rootScope.$on('loadconfigs',function(){
     getJobs()
     setInterval(getJobs, 2000);
