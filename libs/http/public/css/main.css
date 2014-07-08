@@ -3,18 +3,21 @@ body .container .starter-template {
 
 }
 
+.table.jobs .status {
+  font-size: 20px;
+}
 td.log {
   width: 300px;
   cursor:pointer;
 }
-.status.glyphicon-ok {
+.status.success {
   color: green;
 }
 
-.status.glyphicon-remove {
+.status.failed {
   color: red;
 }
 
-.status.glyphicon-warning-sign {
+.status.warning {
   color: orange;
 } 

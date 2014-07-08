@@ -36,11 +36,11 @@ html
               td
                 .animate-switch-container(ng-switch='', on='job.status')
                   .animate-switch(ng-switch-when='failed')
-                    span.status.glyphicon.glyphicon-remove
+                    span.status.failed.glyphicon.glyphicon-exclamation-sign
                   .animate-switch(ng-switch-when='completed') 
-                    span.status.glyphicon.glyphicon-ok
+                    span.status.success.glyphicon.glyphicon-ok-circle
                   .animate-switch(ng-switch-when='timeout') 
-                    span.status.glyphicon.glyphicon-warning-sign(data-toggle="tooltip",data-placement="top", title="Job has terminate by bunnycron from process timeout")
+                    span.status.warning.glyphicon.glyphicon-warning-sign(data-toggle="tooltip",data-placement="top", title="Job has terminate by bunnycron from process timeout")
                   .animate-switch(ng-switch-default='')
 
               td.command
