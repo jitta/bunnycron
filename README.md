@@ -57,7 +57,7 @@ You have to create job in `Cronfile` by cron pattern and command to run. See exa
 [Read more cron patterns here](http://www.thegeekstuff.com/2009/06/15-practical-crontab-examples/).
 
 
-## Running Jobs
+## Running Cronjob
 
 ```js
 var bunny = require('bunnycron')();
@@ -77,7 +77,7 @@ bunny = require('bunnycron')(options);
 bunny.startCron()
 ```
 
-Create a schedule. `options` in an object with the following possible properties.
+when required bunnycron module you can pass `options` in an object with the following possible properties.
 
 * `cronFile` : the location file path to `Cronfile`
 * `redis` : by default, Bunnycron will connect to Redis using the client default settings (port defaults to `6379` and host defaults to `127.0.0.1`, prefix defaults to `bunny`)
