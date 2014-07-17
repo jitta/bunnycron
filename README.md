@@ -1,9 +1,9 @@
 # Bunnycron
-Bunnycron is a module for running jobs on your node.js by cron patterns backed by [redis](http://redis.io). With clean user-interface for viewing schedule job and see your job process.
+Bunnycron is a module for job scheduling trigged by your node.js process. Bunnycron will schedule job based on a cron syntax textfile in your directory project so your jobs will be in the git too. With lock machanism by [Redis](http://redis.io) Bunnycron will prevent the same job running in multiple cluster. Also provided clean user-interface for monitor your jobs, current and past status.
 
 ## Installation
 
-You can also install via npm:
+Install via npm:
 
 ```sh
 npm install bunnycron
@@ -14,30 +14,27 @@ npm install bunnycron
 Bunnycron provide a clean user-interface for viewing your scheduled jobs.
 
 ![Homepage](https://cloud.githubusercontent.com/assets/837612/3614327/7ff3db9e-0dbf-11e4-8c7e-b045899b7c29.jpg)
-
-
+ 
 ### Schedule Log
-Scheduled jobs logging allows you to see how your job are process.
+Logging system allows you to see how your job processed
 
-![schedule log](https://cloud.githubusercontent.com/assets/837612/3609667/9ec2fe9c-0d7e-11e4-870c-69d45de7a8fd.png)
-
+![Schedule log](https://cloud.githubusercontent.com/assets/837612/3609667/9ec2fe9c-0d7e-11e4-870c-69d45de7a8fd.png)
 
 
 
 ## Cronfile
-First create a `Cronfile` file on your root directory of your app
+First create a `Cronfile` file in your root directory of your project.
 
 ![cronfile](https://cloud.githubusercontent.com/assets/837612/3597594/48a60a5e-0cd4-11e4-9cef-e353240433ef.png)
 
 
-
-You have to create job in `Cronfile` by cron pattern and command to run. See example below
+An example of `Cronfile` with the same syntax of your familia Crontab
 
     00 30 12 * * * node backup_databse.js
 
 	*/10 * * * * * ./checkuptime.sh
 
-	00 30 11 * * 1-5 curl -o nixcraft.html http://www.cyberciti.biz/low.html
+	00 30 11 * * 1-5 curl -o aapl.html http://www.jitta.com/stock/aapl
 
 
 ## Available Cron Patterns
@@ -46,11 +43,11 @@ You have to create job in `Cronfile` by cron pattern and command to run. See exa
     Ranges. E.g. 1-3,5
     Steps. E.g. */2
     
-## Cron Example
-    */10 * * * * 1-2  Run every 10 seconds on Monday and Tuesday
-    00 */2 * * * *  Run every 2 minutes everyday
-    00 30 09-10 * * * Run at 09:30 and 10:30 everyday
-    00 30 08 10 06 * Run at 08:30 on 10th June
+## Cronfile Examples
+    */10 * * * * 1-2  echo "Run every 10 seconds on Monday and Tuesday"
+    00 */2 * * * *  echo "Run every 2 minutes everyday"
+    00 30 09-10 * * * echo "Run at 09:30 and 10:30 everyday"
+    00 30 08 10 06 * echo "Run at 08:30 on 10th June"
 
     - 00 for Sunday or 24.00
 
