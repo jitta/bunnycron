@@ -13,7 +13,8 @@ npm install bunnycron
 ### Schedule Overview
 Bunnycron provide a clean user-interface for viewing your scheduled jobs.
 
-![summary](https://cloud.githubusercontent.com/assets/837612/3609563/cda4693c-0d7c-11e4-8b64-77ec7ab6c3d9.png)
+![Homepage](https://cloud.githubusercontent.com/assets/837612/3614327/7ff3db9e-0dbf-11e4-8c7e-b045899b7c29.jpg)
+
 
 ### Schedule Log
 Scheduled jobs logging allows you to see how your job are process.
