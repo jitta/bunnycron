@@ -21,6 +21,7 @@ npm install bunnycron
 
 ## Cronfile
 You have to create `Cronfile` on your root directory of your app
+
 ![cronfile](https://cloud.githubusercontent.com/assets/837612/3597594/48a60a5e-0cd4-11e4-9cef-e353240433ef.png)
 
 
