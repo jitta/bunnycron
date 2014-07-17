@@ -79,14 +79,15 @@ bunny.startCron()
 
 Create a schedule. `options` in an object with the following possible properties.
 
-* `cronFile` : The file path of `Cronfile`
+* `cronFile` : the location file path to `Cronfile`
 * `redis` : by default, Bunnycron will connect to Redis using the client default settings (port defaults to `6379` and host defaults to `127.0.0.1`, prefix defaults to `bunny`)
 * `prefix` : defaults to `bunny`. Custom redis predix
-* `baseUrl`: defaults to `bunny`. You can access User Interface via `localhost/bunny`. Change this option to custom you bunnyapp url.
+* `baseUrl`: defaults to `/bunny`. You can access User Interface via `localhost/bunny`. Change this option to custom you bunnycron url.
 
 
 
 ## User-Interface
+To viewing your scheduled jobs UI. You can use `bunny.app` with your exists express.js application.
 
 ```js
 var express = require('express');
