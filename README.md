@@ -1,5 +1,5 @@
 # Bunnycron
-Bunnycron is a module for running jobs on your node.js by cron patterns.
+Bunnycron is a module for running jobs on your node.js by cron patterns backed by [redis](http://redis.io). With clean user-interface for viewing schedule job and see your job process.
 
 ## Installation
 
