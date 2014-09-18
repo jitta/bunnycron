@@ -1,6 +1,8 @@
 # Bunnycron
 Bunnycron is a module for job scheduling trigged by your node.js process. Bunnycron will schedule job based on a cron syntax textfile in your directory project so your jobs will be in the git too. With lock machanism by [Redis](http://redis.io) Bunnycron will prevent the same job running in multiple cluster. Also provided clean user-interface for monitor your jobs, current and past status.
 
+[![Build Status](https://travis-ci.org/jitta/bunnycron.svg)](https://travis-ci.org/jitta/bunnycron)
+
 ## Installation
 
 Install via npm:
