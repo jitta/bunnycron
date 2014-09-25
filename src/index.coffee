@@ -12,7 +12,7 @@ noop = ->
 
 BunnyCron =  (@options = {})->
   self = @
-
+  @client = exports.client
   createWorker = ->
     self.jobs = Cron.loadFile(self.options.cronFile)
     self.worker = [] 
@@ -21,7 +21,7 @@ BunnyCron =  (@options = {})->
 
   createWorker() if @options.cronFile?
   
-  # @init()
+  @init()
 
   return @
 
