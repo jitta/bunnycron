@@ -16,8 +16,6 @@ class Worker
     @client.hmset @getKey(), @job, @runTask.bind(this)
 
   runTask: ->
-    # @runCommand()
-    # console.log @job.schedule
     @cron = new CronJob(@job.schedule, @runCommand.bind(this), null, true)
     @set "next_run", @getNextRun()
 
@@ -60,7 +58,7 @@ class Worker
           callback null, true
 
   complete: (data, status) ->
-    # console.log data
+    self = @
     log = data.data
     
     unless status
@@ -72,7 +70,10 @@ class Worker
     @set "status", status
     @set "completed_at", Date.now()
     @set "next_run", @getNextRun()
-    @del "is_run"
+    setTimeout =>
+      self.del "is_run"
+    , 500 
+
     @log log
     return
 
