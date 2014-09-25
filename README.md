@@ -79,10 +79,9 @@ bunny.startCron()
 
 when required bunnycron module you can pass `options` in an object with the following possible properties.
 
-* `cronFile` : the location file path to `Cronfile`
+* `cronFile` : the directory path to `Cronfile` ex. `./path/to/dir`
 * `redis` : by default, Bunnycron will connect to Redis using the client default settings (port defaults to `6379` and host defaults to `127.0.0.1`, prefix defaults to `bunny`)
 * `prefix` : defaults to `bunny`. Custom redis predix
-* `baseUrl`: defaults to `/bunny`. You can access User Interface via `localhost/bunny`. Change this option to custom you bunnycron url.
 
 
 
@@ -95,6 +94,7 @@ var app = express();
 var bunny = require('bunnycron')()
 bunny.startCron();
 app.use(bunny.app);
+// app.use('/bunny/', bunny.app) or custom base url
 app.listen(3000);
 
 ```

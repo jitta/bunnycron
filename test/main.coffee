@@ -8,9 +8,24 @@ describe 'Initialize', ->
 
   afterEach (done) -> redisHelper.flushAll done
 
-  it 'Should throw error when not found Cronfile', ->
+  it 'Default cronfile path should in root app directory', ->
+    mainAppPath = require('path').dirname(require.main.filename) + '/Cronfile'
     bunny = require('../')()
-    ( -> bunny.startCron()).should.throw(/no such file or directory/)
+    expect(bunny.options.cronFile).eql mainAppPath
+
+  it 'Should throw error when not found Cronfile with default cronFile', ->
+    bunny = require('../')()
+    mainAppPath = require('path').dirname(require.main.filename) + '/Cronfile'
+    error = "ENOENT, no such file or directory '#{mainAppPath}'"
+    ( -> bunny.startCron()).should.throw(error)
+
+
+  it 'Should throw error when not found Cronfile with cronFile options', ->
+    bunny = require('../')(
+      cronFile: __dirname + '/notexist'
+      )
+    error = "ENOENT, no such file or directory '#{__dirname}/notexist/Cronfile'"
+    ( -> bunny.startCron()).should.throw(error)
 
   it.skip 'Should run once time per cron when run node multiple instance', (done) ->
 
@@ -48,7 +63,7 @@ describe 'Initialize', ->
 
   it 'Should throw error when cron pattern invalid', ->
     config = 
-      cronFile: 'test/fixture/invalid_cron'
+      cronFile: __dirname + '/cronfile/invalid'
     bunny = require('../')(config)
     ( -> bunny.startCron()).should.throw(/Cron pattern not valid/);
 

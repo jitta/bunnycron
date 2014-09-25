@@ -2,6 +2,7 @@ bunny = require('../')({
   cronFile:'examples/Cronfile',
   redis: {
     port: 6379,
-    host: 'localhost',
+    host: 'localhost'
+    }
   });
 bunny.startCron()

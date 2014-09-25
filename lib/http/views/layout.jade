@@ -45,7 +45,7 @@ html
 
               td.command
                 span {{job.command}} 
-                img(src="/img/preloader.gif", width=30, height=10, ng-show="job.is_run")
+                img(src="img/preloader.gif", width=30, height=10, ng-show="job.is_run")
               td.schedule {{job.schedule}}
               td.last_run
                 a(href='#', ng-show="{{job.completed_at}}", data-toggle='tooltip', title=" {{job.completed_at | date:'MMM dd H:mm Z' }}", ng-if="job.completed_at") {{ job.completed_at | toUTCDate  }}

@@ -4,59 +4,62 @@ exec = require("child_process").exec
 async = require('async')
 Worker = require('./worker')
 redis = require("./redis")
-app = undefined
-client = undefined
+
+app = options = undefined
 
 noop = ->
 
 
-BunnyCron =  ->
-  self = this
-  @options = exports.options
+BunnyCron =  (@options = {})->
+  self = @
 
-  @client = client
+  createWorker = ->
+    self.jobs = Cron.loadFile(self.options.cronFile)
+    self.worker = [] 
+    for job in self.jobs
+      self.worker.push new Worker(job)
 
-  Worker.prefix = exports.prefix = @options.prefix
-  @jobs = Cron.loadFile(@options.cronFile)
-  @init()
-  bunny: self
+  createWorker() if @options.cronFile?
+  
+  # @init()
 
-exports = module.exports = (options = {} ) ->
-  defaults =
-    cronFile: "Cronfile"
-    prefix: "bunny"
-    baseUrl: '/bunny'
+  return @
 
-  options = _.merge(defaults, options)
-  options.baseUrl = sanitizeUrl options.baseUrl
-  exports.options = options
-  Worker.prefix = exports.prefix = options.prefix
-  redis.reset()
-  redis.createClient = ->
-    options.redis = {} unless options.redis?
-    self = this
-    port = options.redis.port or 6379
-    host = options.redis.host or "127.0.0.1"
-    client = require('redis').createClient(port, host, options.redis.options)
-    client.auth options.redis.auth if options.redis.auth
-    client.on "error", (err) ->
-      console.log 'Bunnycron connected redis error: '+err
+sanitizeUrl = (url) ->
+  if url.length > 0 and url[url.length-1] isnt '/'
+    url += '/'
 
-    return client
-    
-  Worker.client = exports.client = redis.createClient()
-  exports.app = require("./http")()
+  return url
 
 
+exports = module.exports = (options = {}) ->
+  if options.cronFile
+    cronFile = options.cronFile.replace(/\/$/, '') + '/Cronfile'
+  else
+    cronFile = require('path').dirname(require.main.filename) + '/Cronfile'
 
+  _options =
+    prefix: options.prefix or "bunny"
+    cronFile: cronFile
+
+  redis.setupConfig _options
+  exports.client = Worker.client = redis.createClient()
+  Worker.prefix = _options.prefix
+  exports.options = _options
 
   return exports
 
-exports.version = require("../package.json").version
+Object.defineProperty exports, 'app', {
+  get: ->
+    return (app = require("./http") )
+}
 
-# Object.defineProperty exports, "app",
-#   get: ->
-#     app or (app = require("./http"))
+exports.startCron = ->
+  BunnyCron.singleton = new BunnyCron(exports.options) unless BunnyCron.singleton
+  BunnyCron.singleton
+
+
+exports.version = require("../package.json").version
 
 
 BunnyCron::init = ->
@@ -64,7 +67,7 @@ BunnyCron::init = ->
     @clearInactiveJobs.bind(this)
     @clearRunningJobs.bind(this)
     @clearInactiveLogs.bind(this)
-    ], @createWorker.bind(this)
+    ], ->
 
 ### 
 When you changed jobs on Cronfile. Old jobs key won't deleted.
@@ -112,14 +115,6 @@ BunnyCron::filterInactiveJobs = (keys, jobs) ->
     return !(_.find(jobs,{id:id}))
 
 
-BunnyCron::createWorker = ->
-  # job = @jobs[0]
-  # job = @jobs[0]
-  # new Worker(job)
-  # console.log 'createWorker'
-  for job in @jobs
-    new Worker(job)
-
 
 sanitizeUrl = (url) ->
   if url.length > 0 and url[url.length-1] isnt '/'
@@ -132,6 +127,10 @@ BunnyCron::del = (id, key, callback) ->
   hash = @options.prefix + ":job:" + id
   @client.hdel hash, key, callback or noop
 
+BunnyCron::shutdown = exports.shutdown = ->
+  BunnyCron.singleton = null
+
+
 exports.parallel = parallel = (tasks, fn, done) ->
     fns = []
     for task in tasks
@@ -140,6 +139,4 @@ exports.parallel = parallel = (tasks, fn, done) ->
 
     async.parallel fns, done
 
-exports.startCron = (options) ->
-  BunnyCron.singleton = new BunnyCron(options)  unless BunnyCron.singleton
-  BunnyCron.singleton
+

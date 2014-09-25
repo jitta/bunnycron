@@ -6,10 +6,7 @@ Create a RedisClient.
 @return {RedisClient}
 @api private
 ###
-exports.createClient = ->
-  client = undefined
-  client = redis.createClient()
-  client
+
 
 exports.defaultCreateClient = exports.createClient
 
@@ -33,3 +30,26 @@ exports.reset = ->
   exports._pubsub = null
   exports.createClient = exports.defaultCreateClient
   return
+
+exports.setupConfig = (options) ->
+  options.prefix = options.prefix or 'bunny'
+  options.redis = options.redis or {}
+  exports.reset()
+
+  exports.createClient = ->
+    socket = options.redis.socket
+    port = unless socket then (options.redis.port || 6379) else null
+    host = unless socket then (options.redis.host || '127.0.0.1') else null
+    client = redis.createClient( socket || port , host, options.redis.options )
+    if options.redis.auth
+      client.auth options.redis.auth
+    
+    if options.redis.db
+      client.select options.redis.db
+    client.on 'error', (err) ->
+      console.log 'bunny connect redis error ', err
+
+    client.prefix = options.prefix
+    client.getKey = (key) -> @prefix + ':' + key
+    
+    return client

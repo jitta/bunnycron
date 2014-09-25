@@ -2,7 +2,7 @@ async = require('async')
 _ = require('lodash')
 bunny = require("../../")
 client = bunny.client
-prefix = bunny.options.prefix
+prefix = bunny.client.prefix
 
 exports.configs = (req, res) ->
   res.json bunny.options

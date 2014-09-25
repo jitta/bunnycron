@@ -1,6 +1,8 @@
 exec = require("child_process").exec
 moment = require('moment')
 CronJob = require("cron").CronJob
+events = require('events')
+
 noop = ->
 
 class Worker
@@ -8,28 +10,34 @@ class Worker
     @client = Worker.client
     @prefix = Worker.prefix
     @initStatus()
+    return @
 
   initStatus: ->
     @client.hmset @getKey(), @job, @runTask.bind(this)
 
   runTask: ->
+    # @runCommand()
+    # console.log @job.schedule
     @cron = new CronJob(@job.schedule, @runCommand.bind(this), null, true)
     @set "next_run", @getNextRun()
 
-
   runCommand: ->
     @isActive (err, isActive) =>
-      console.log isActive,'isActive'
       if isActive is false
-        console.log "Running command: " + @job.schedule + " " + @job.command
-        # @set "status", "active"
-        @child = exec @job.command, (error, stdout, stderr) =>
+        @set "status", "active"
+        @child = exec(@job.command)
+        output = ''
+        @child.stdout.on "data", (data) ->
+          output += data
+        @child.stderr.on "data", (data) ->
+          output += data
+
+        @child.on "close", (code) =>
           console.log "Run command completed: "+ @job.schedule + " " + @job.command
-          status = 'timeout' if error?.killed
+          status = 'timeout' if code is 8 # Code for SIGINT Signal
           execResult =
-            error: error
-            stdout: stdout
-            stderr: stderr
+            code: code
+            data: output
 
           @complete execResult, status
 
@@ -39,7 +47,7 @@ class Worker
 
   killActiveJob: ->
     @child.kill "SIGINT"
-    console.log "Job has terminate by bunnycron from process timeout"
+    # console.log "Job has terminate by bunnycron from process timeout"
 
   isActive: (callback) ->
     @client.hsetnx @getKey(), "is_run", 'running', (err, is_run) ->
@@ -53,10 +61,10 @@ class Worker
 
   complete: (data, status) ->
     # console.log data
-    log = data.stderr or data.stdout
+    log = data.data
     
     unless status
-      if (data.stderr isnt "") or data.error
+      if data.code?
         status = "failed"
       else
         status = "completed"
@@ -83,13 +91,24 @@ class Worker
     logObj =
       completedAt: Date.now()
       data: log
+
     hash = @prefix + ':log:' + @job.id
-    @client.multi().lpush(hash, JSON.stringify(logObj)).ltrim(hash, 0, 20).exec()
+    @client.multi().lpush(hash, JSON.stringify(logObj)).ltrim(hash, 0, 20).exec =>
+      @emit 'complete', log
 
   getNextRun: ->
     return moment().add('milliseconds', @cron._timeout._idleTimeout).valueOf()
 
   getKey: ->
     return @prefix + ':job:' + @job.id
+
+  start: ->
+    @cron.start()
+
+  stop: ->
+    @cron.stop()
+
+
+Worker.prototype.__proto__ = events.EventEmitter.prototype
 
 module.exports = Worker

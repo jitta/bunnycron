@@ -1,25 +1,28 @@
 express = require("express")
+bunny = require('../../')()
 json = require("./routes/json")
-bunny = require('../../')
 moment = require('moment')
-app = express()
 # expose the app
-module.exports = ->
-  baseUrl = bunny.options.baseUrl
+app = express()
 
-  app.set "view engine", "jade"
-  app.set "views", __dirname + "/views"
-  app.set "title", "Bunny"
+module.exports = app 
+
+baseUrl = bunny.options.baseUrl
+
+app.set "view engine", "jade"
+app.set "views", __dirname + "/views"
+app.set "title", "Bunny"
 
 
-  # middleware
-  app.use express.favicon()
-  app.use express.static(__dirname + "/public")
-  # JSON api
-  app.get "#{baseUrl}stats", json.stats
+# middleware
+app.use express.favicon()
+app.use express.static(__dirname + "/public")
+# JSON api
+app.get "/stats", json.stats
 
-  app.get "/bunnyconfigs", json.configs
+app.get "/config", json.configs
 
-  app.get "#{baseUrl.slice(0,-1)}", (req, res) ->
-    res.locals.moment = moment
-    res.render "layout"
+app.get "/", (req, res) ->
+  res.locals.moment = moment
+  res.render "layout"
+

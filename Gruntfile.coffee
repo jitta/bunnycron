@@ -10,7 +10,7 @@ module.exports = (grunt) ->
           expand: true
           cwd: "./src"
           src: ["**/*.coffee"]
-          dest: "libs"
+          dest: "lib"
           ext: ".js"       
         ]
   grunt.loadNpmTasks 'grunt-contrib-coffee'
