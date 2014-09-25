@@ -1,6 +1,6 @@
 {
   "name": "bunnycron",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Scheduling task on your webapp",
   "keywords": [
     "schedule",
