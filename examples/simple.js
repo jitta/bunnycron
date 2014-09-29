@@ -1,7 +1,4 @@
-var Bunny = require('../');
-Bunny.startCron({cronFile:'examples/Cronfile'});
-// console.log(Bunny)
-// console.log(bunny);
-// console.log('aaaaaa')
-// bunny.app.listen(3000);
-// console.log('UI started on port 3000');
+var bunny = require('../')({cronFile:'examples/'})
+bunny.startCron();
+bunny.app.listen(3000)
+console.log("Running on localhost:3000")
