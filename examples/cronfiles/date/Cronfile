@@ -1,0 +1,1 @@
+0 * * * * * echo "$(date "+%m%d%Y %T")" >> cron.log

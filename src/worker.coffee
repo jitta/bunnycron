@@ -98,7 +98,7 @@ class Worker
       @emit 'complete', log
 
   getNextRun: ->
-    return moment().add('milliseconds', @cron._timeout._idleTimeout).valueOf()
+    return moment().add(@cron._timeout._idleTimeout, 'milliseconds').valueOf()
 
   getKey: ->
     return @prefix + ':job:' + @job.id
