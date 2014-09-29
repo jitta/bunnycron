@@ -31,16 +31,14 @@ exports = module.exports = (options = {}) ->
     cronFile = options.cronFile.replace(/\/$/, '') + '/Cronfile'
   else
     cronFile = './Cronfile'
-    # cronFile = require('path').dirname(require.main.filename) + '/Cronfile'
 
-  _options =
-    prefix: options.prefix or "bunny"
-    cronFile: cronFile
 
-  redis.setupConfig _options
+  options.cronFile = cronFile
+  options.prefix = options.prefix or 'bunny'
+  redis.setupConfig options
   exports.client = Worker.client = redis.createClient()
-  Worker.prefix = _options.prefix
-  exports.options = _options
+  Worker.prefix = options.prefix
+  exports.options = options
 
   return exports
 

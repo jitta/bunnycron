@@ -1,5 +1,5 @@
 express = require("express")
-bunny = require('../../')()
+bunny = require('../../')
 json = require("./routes/json")
 moment = require('moment')
 # expose the app

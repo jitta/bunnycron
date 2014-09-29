@@ -34,6 +34,8 @@ exports.reset = ->
 exports.setupConfig = (options) ->
   options.prefix = options.prefix or 'bunny'
   options.redis = options.redis or {}
+  # console.log options,'<<<<<'
+  # console.log 'XXXXXXXXXXX'
   exports.reset()
 
   exports.createClient = ->
