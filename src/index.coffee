@@ -25,18 +25,13 @@ BunnyCron =  (@options = {})->
 
   return @
 
-sanitizeUrl = (url) ->
-  if url.length > 0 and url[url.length-1] isnt '/'
-    url += '/'
-
-  return url
-
 
 exports = module.exports = (options = {}) ->
   if options.cronFile
     cronFile = options.cronFile.replace(/\/$/, '') + '/Cronfile'
   else
-    cronFile = require('path').dirname(require.main.filename) + '/Cronfile'
+    cronFile = './Cronfile'
+    # cronFile = require('path').dirname(require.main.filename) + '/Cronfile'
 
   _options =
     prefix: options.prefix or "bunny"
@@ -114,13 +109,6 @@ BunnyCron::filterInactiveJobs = (keys, jobs) ->
     id = item.split(':')[2]
     return !(_.find(jobs,{id:id}))
 
-
-
-sanitizeUrl = (url) ->
-  if url.length > 0 and url[url.length-1] isnt '/'
-    url += '/'
-
-  return url
 
 
 BunnyCron::del = (id, key, callback) ->

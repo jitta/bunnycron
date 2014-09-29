@@ -9,14 +9,12 @@ describe 'Initialize', ->
   afterEach (done) -> redisHelper.flushAll done
 
   it 'Default cronfile path should in root app directory', ->
-    mainAppPath = require('path').dirname(require.main.filename) + '/Cronfile'
     bunny = require('../')()
-    expect(bunny.options.cronFile).eql mainAppPath
+    expect(bunny.options.cronFile).eql './Cronfile'
 
   it 'Should throw error when not found Cronfile with default cronFile', ->
     bunny = require('../')()
-    mainAppPath = require('path').dirname(require.main.filename) + '/Cronfile'
-    error = "ENOENT, no such file or directory '#{mainAppPath}'"
+    error = "ENOENT, no such file or directory './Cronfile'"
     ( -> bunny.startCron()).should.throw(error)
 
 
