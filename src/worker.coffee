@@ -29,16 +29,17 @@ class Worker
         @child.stderr.on "data", (data) ->
           output += data
 
-        @child.on "close", (code) =>
+        @child.on 'exit', (code, signal) =>
           console.log "Run job completed: "+ @job.schedule + " " + @job.command
           @setStatus(code)
           @complete(output)
+
         timeout = @cron._timeout._idleTimeout
         setTimeout @killActiveJob.bind(this), timeout - 1000
 
 
   setStatus: (code) ->
-    if code is 130 # Code for SIGINT Signal
+    unless code?
       @status = 'timeout'
     else if code is 0
       @status = "completed"
@@ -47,7 +48,7 @@ class Worker
 
 
   killActiveJob: ->
-    @child.kill "SIGINT"
+    @child.kill "SIGHUP"
 
   isActive: (callback) ->
     @client.hsetnx @getKey(), "is_run", 'running', (err, is_run) ->
