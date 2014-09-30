@@ -3,7 +3,9 @@ bunny = require '../'
 redisHelper = require './helper/redis'
 
 describe 'startCron', ->
-  after (done) -> redisHelper.flushAll done
+  before (done) -> redisHelper.flushAll done
+
+  afterEach (done) -> redisHelper.flushAll done
   afterEach ->
     bunny.shutdown()
 
@@ -30,11 +32,50 @@ describe 'startCron', ->
     msg = 'Normal 1\nError 2\nNormal 3\nError 4\nError 5\nNormal 6\n'
     worker.on 'complete', (data) ->
       expect(data).eql msg
-      bunny.client.lrange 'bunny:log:' + worker.job.id, 0, -1, (err, logs) ->
+      worker.getLogs (err, logs) ->
         expect(logs).have.length 1
-        log = JSON.parse logs[0]
-        expect(log.data).eql msg
+        expect(logs[0].data).eql msg
         worker.stop()
         done()
 
-  it 'Should set status to timeout when script not run finished', ->
+
+  it 'Should set status to "failed" when script was failed', (done) ->
+    config = 
+      cronFile: __dirname + '/cronfile/failed'
+
+    bunny = require('../')(config)
+    bun = bunny.startCron()
+    worker = bun.worker[0]
+    worker.on 'complete', (data) ->
+      worker.getLogs (err, logs) ->
+        expect(logs[0].status).eql 'failed'
+        worker.stop()
+        done()
+
+  it 'Should set status to "timeout" when script not run finished', (done) ->
+    config = 
+      cronFile: __dirname + '/cronfile/timeout'
+
+    bunny = require('../')(config)
+    bun = bunny.startCron()
+    worker = bun.worker[0]
+    worker.on 'complete', (data) ->
+      worker.getLogs (err, logs) ->
+        expect(logs[0].status).eql 'timeout'
+        worker.stop()
+        done()
+
+
+  it 'Should set status to "completed" when run success', (done) ->
+    config = 
+      cronFile: __dirname + '/cronfile/stdout'
+
+    bunny = require('../')(config)
+    bun = bunny.startCron()
+    worker = bun.worker[0]
+    worker.on 'complete', (data) ->
+      worker.getLogs (err, logs) ->
+        expect(logs[0].status).eql 'completed'
+        worker.stop()
+        done()
+

@@ -22,7 +22,6 @@ class Worker
   runCommand: ->
     @isActive (err, isActive) =>
       if isActive is false
-        @set "status", "active"
         @child = exec(@job.command)
         output = ''
         @child.stdout.on "data", (data) ->
@@ -31,21 +30,24 @@ class Worker
           output += data
 
         @child.on "close", (code) =>
-          console.log "Run command completed: "+ @job.schedule + " " + @job.command
-          status = 'timeout' if code is 8 # Code for SIGINT Signal
-          execResult =
-            code: code
-            data: output
-
-          @complete execResult, status
-
+          console.log "Run job completed: "+ @job.schedule + " " + @job.command
+          @setStatus(code)
+          @complete(output)
         timeout = @cron._timeout._idleTimeout
         setTimeout @killActiveJob.bind(this), timeout - 1000
 
 
+  setStatus: (code) ->
+    if code is 130 # Code for SIGINT Signal
+      @status = 'timeout'
+    else if code is 0
+      @status = "completed"
+    else
+      @status = "failed"
+
+
   killActiveJob: ->
     @child.kill "SIGINT"
-    # console.log "Job has terminate by bunnycron from process timeout"
 
   isActive: (callback) ->
     @client.hsetnx @getKey(), "is_run", 'running', (err, is_run) ->
@@ -57,17 +59,10 @@ class Worker
         else
           callback null, true
 
-  complete: (data, status) ->
+  complete: (output) ->
     self = @
-    log = data.data
-    
-    unless status
-      if data.code?
-        status = "failed"
-      else
-        status = "completed"
-
-    @set "status", status
+    log = output
+    @set "status", @status
     @set "completed_at", Date.now()
     @set "next_run", @getNextRun()
     setTimeout =>
@@ -92,10 +87,17 @@ class Worker
     logObj =
       completedAt: Date.now()
       data: log
+      status: @status
 
     hash = @prefix + ':log:' + @job.id
     @client.multi().lpush(hash, JSON.stringify(logObj)).ltrim(hash, 0, 20).exec =>
       @emit 'complete', log
+
+  getLogs: (callback) ->
+    hash = "#{@prefix}:log:#{@job.id}"
+    @client.lrange hash, 0, -1, (err, logs) ->
+      logs = logs.map (log) -> JSON.parse(log)
+      callback err, logs
 
   getNextRun: ->
     return moment().add(@cron._timeout._idleTimeout, 'milliseconds').valueOf()

@@ -34,8 +34,6 @@ exports.reset = ->
 exports.setupConfig = (options) ->
   options.prefix = options.prefix or 'bunny'
   options.redis = options.redis or {}
-  # console.log options,'<<<<<'
-  # console.log 'XXXXXXXXXXX'
   exports.reset()
 
   exports.createClient = ->
@@ -49,7 +47,7 @@ exports.setupConfig = (options) ->
     if options.redis.db
       client.select options.redis.db
     client.on 'error', (err) ->
-      console.log 'bunny connect redis error ', err
+      console.log 'bunnycron connect redis error ', err
 
     client.prefix = options.prefix
     client.getKey = (key) -> @prefix + ':' + key

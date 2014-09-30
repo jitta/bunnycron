@@ -1,0 +1,1 @@
+*/3 * * * * * node test/fixture/timeout.js
