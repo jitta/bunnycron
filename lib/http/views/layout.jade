@@ -60,7 +60,7 @@ html
               div.modal-content
                 ul.list-group
                   li.list-group-item(ng-repeat="log in logs track by $index", ng-controller="LogCtrl")
-                    div.panel(ng-class="panelCls")
+                    div.panel(ng-class="getLogClass(log.status)")
                       div.panel-heading {{log.completedAt | toUTCDate }}
                       div.panel-body.pandel-danger( ng-bind-html="log.data | to_trusted")
 
