@@ -16,7 +16,12 @@ class Worker
     @client.hmset @getKey(), @job, @runTask.bind(this)
 
   runTask: ->
-    @cron = new CronJob(@job.schedule, @runCommand.bind(this), null, true)
+    @cron = new CronJob
+      cronTime: @job.schedule
+      onTick: @runCommand.bind(this)
+      start: true
+      timeZone: "UTC"
+
     @set "next_run", @getNextRun()
 
   runCommand: ->
@@ -101,7 +106,7 @@ class Worker
       callback err, logs
 
   getNextRun: ->
-    return moment().add(@cron._timeout._idleTimeout, 'milliseconds').valueOf()
+    return moment().utc().add(@cron._timeout._idleTimeout, 'milliseconds').valueOf()
 
   getKey: ->
     return @prefix + ':job:' + @job.id
