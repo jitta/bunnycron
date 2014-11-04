@@ -25,22 +25,22 @@ class Worker
     @set "next_run", @getNextRun()
 
   runCommand: ->
-    @isActive (err, isActive) =>
+    self = @
+    @isActive (err, isActive) ->
       if isActive is false
-        @child = exec(@job.command)
+        self.child = exec(self.job.command, maxBuffer: 5000 * 1024)
         output = ''
-        @child.stdout.on "data", (data) ->
+        self.child.stdout.on "data", (data) ->
           output += data
-        @child.stderr.on "data", (data) ->
+        self.child.stderr.on "data", (data) ->
           output += data
 
-        @child.on 'exit', (code, signal) =>
-          console.log "Run job completed: "+ @job.schedule + " " + @job.command
-          @setStatus(code)
-          @complete(output)
-
-        timeout = @cron._timeout._idleTimeout
-        setTimeout @killActiveJob.bind(this), timeout - 1000
+        self.child.on 'exit', (code, signal) ->
+          console.log "Run job completed: "+ self.job.schedule + " " + self.job.command
+          self.setStatus(code)
+          self.complete(output)
+        timeout = self.cron._timeout._idleTimeout
+        setTimeout self.killActiveJob.bind(self), timeout - 1000
 
 
   setStatus: (code) ->
