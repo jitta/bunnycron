@@ -5,7 +5,7 @@ moment = require('moment')
 # expose the app
 app = express()
 
-module.exports = app 
+module.exports = app
 
 baseUrl = bunny.options.baseUrl
 
@@ -15,7 +15,6 @@ app.set "title", "Bunny"
 
 
 # middleware
-app.use express.favicon()
 app.use express.static(__dirname + "/public")
 # JSON api
 app.get "/stats", json.stats

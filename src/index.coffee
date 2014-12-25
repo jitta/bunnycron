@@ -4,7 +4,6 @@ exec = require("child_process").exec
 async = require('async')
 Worker = require('./worker')
 redis = require("./redis")
-
 app = options = undefined
 
 noop = ->
@@ -15,12 +14,12 @@ BunnyCron =  (@options = {})->
   @client = exports.client
   createWorker = ->
     self.jobs = Cron.loadFile(self.options.cronFile)
-    self.worker = [] 
+    self.worker = []
     for job in self.jobs
       self.worker.push new Worker(job)
 
   createWorker() if @options.cronFile?
-  
+
   @init()
 
   return @
@@ -62,7 +61,7 @@ BunnyCron::init = ->
     @clearInactiveLogs.bind(this)
     ], ->
 
-### 
+###
 When you changed jobs on Cronfile. Old jobs key won't deleted.
 ###
 BunnyCron::clearInactiveJobs = (callback) ->
@@ -76,7 +75,7 @@ BunnyCron::clearInactiveJobs = (callback) ->
       self.client.del id, done
 
     parallel inactiveJobs, eachTaskFn, callback
-    # parallel inactiveJobs, eachTaskFn, 
+    # parallel inactiveJobs, eachTaskFn,
 
 BunnyCron::clearRunningJobs = (callback) ->
   self = this
