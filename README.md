@@ -1,5 +1,5 @@
 # Bunnycron
-Bunnycron is a module for job scheduling trigged by your node.js process. Bunnycron will schedule job based on a cron syntax textfile in your directory project so your jobs will be in the git too. With lock machanism by [Redis](http://redis.io) Bunnycron will prevent the same job running in multiple cluster. Also provided clean user-interface for monitor your jobs, current and past status.
+Bunnycron is a job scheduling module trigged by your node.js process. Bunnycron will schedule a job based on a cron syntax textfile in your project directory, so you can keep your job scheduling definition in your git repository. With a lock machanism provided by [Redis](http://redis.io), Bunnycron will prevent the same job running multiple times within a cluster. It provides a clean user interface to monitor your jobs and their statuses.
 
 [![Build Status](https://travis-ci.org/jitta/bunnycron.svg)](https://travis-ci.org/jitta/bunnycron)
 
@@ -13,12 +13,12 @@ npm install bunnycron
 
 ## User Interface
 ### Schedule Overview
-Bunnycron provide a clean user-interface for viewing your scheduled jobs.
+Bunnycron provides a clean user-interface for viewing your scheduled jobs.
 
 ![Homepage](https://cloud.githubusercontent.com/assets/837612/3614327/7ff3db9e-0dbf-11e4-8c7e-b045899b7c29.jpg)
  
 ### Schedule Log
-Logging system allows you to see how your job processed
+The logging system allows you to see how your job processed
 
 ![Schedule log](https://cloud.githubusercontent.com/assets/837612/3609667/9ec2fe9c-0d7e-11e4-870c-69d45de7a8fd.png)
 
@@ -30,7 +30,7 @@ First create a `Cronfile` file in your root directory of your project.
 ![cronfile](https://cloud.githubusercontent.com/assets/837612/3597594/48a60a5e-0cd4-11e4-9cef-e353240433ef.png)
 
 
-An example of `Cronfile` with the same syntax of your familia Crontab
+An example of `Cronfile` with the same syntax of your familiar Crontab
 
     00 30 12 * * * node backup_databse.js
 
@@ -57,7 +57,7 @@ An example of `Cronfile` with the same syntax of your familia Crontab
 [Read more cron patterns here](http://www.thegeekstuff.com/2009/06/15-practical-crontab-examples/).
 
 
-## Running Cronjob
+## Running a Cronjob
 
 ```js
 var bunny = require('bunnycron')();
@@ -86,7 +86,7 @@ when required bunnycron module you can pass `options` in an object with the foll
 
 
 ## User-Interface
-To viewing your scheduled jobs UI. You can use `bunny.app` with your exists express.js application.
+To view your scheduled jobs UI. You can use `bunny.app` within your existing express.js application.
 
 ```js
 var express = require('express');
