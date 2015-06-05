@@ -18,6 +18,7 @@ exports.stats = (req, res) ->
       _results[id].logs = results.logs[id] if results.logs?[id]?
 
     res.json _results
+
 getJobsData = (done)->
   results = {}
   client.keys "#{prefix}:job*", (err, keys) ->
@@ -35,6 +36,7 @@ getJobsData = (done)->
 
 
 getJobsLog = (done) ->
+
   results = {}
   client.keys "#{prefix}:log*", (err, keys) ->
     return done err if err or keys.length is 0
@@ -42,7 +44,7 @@ getJobsLog = (done) ->
     count = 0
     for key in keys
       do (key) ->
-        client.lrange key, 0, -1, (err, item) ->
+        client.lrange key, 0, 0, (err, item) ->
           count++
           id = key.split(':')[2]
           results[id] = item

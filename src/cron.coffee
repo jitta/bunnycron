@@ -33,7 +33,7 @@ isValidCron = (cronTime) ->
     return false
 
   return true
-  
+
 
 makeJobId = (command) ->
   require("crypto").createHash("md5").update(command).digest "hex"
