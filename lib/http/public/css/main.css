@@ -20,4 +20,8 @@ td.log {
 
 .status.warning {
   color: orange;
-} 
+}
+
+.full-log {
+  cursor: pointer;
+}

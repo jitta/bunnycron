@@ -26,43 +26,62 @@ html
               th
               th TASK
               th FREQUENCY
-              th LAST RUN
-              th NEXT RUN
+              th(width="150") LAST RUN
+              th(width="150") NEXT RUN
               th RESULT
           tbody
-            tr(ng-show="jobs == null")
+            tr(ng-show="loading")
+              td(colspan="5" align="center" )
+                img(src="img/ellipsis.svg" width="80")
+            tr(ng-show="(jobs == null) && loading == false")
               td(colspan="5", align="center") {{jobs}} Not found scheduled, Please add to Cronfile
             tr(ng-repeat="job in jobs")
               td
                 .animate-switch-container(ng-switch='', on='job.status')
                   .animate-switch(ng-switch-when='failed')
                     span.status.failed.glyphicon.glyphicon-exclamation-sign
-                  .animate-switch(ng-switch-when='completed') 
+                  .animate-switch(ng-switch-when='completed')
                     span.status.success.glyphicon.glyphicon-ok-circle
-                  .animate-switch(ng-switch-when='timeout') 
+                  .animate-switch(ng-switch-when='timeout')
                     span.status.warning.glyphicon.glyphicon-warning-sign(data-toggle="tooltip",data-placement="top", title="Job has terminate by bunnycron from process timeout")
                   .animate-switch(ng-switch-default='')
 
               td.command
-                span {{job.command}} 
+                span {{job.command}}
                 img(src="img/preloader.gif", width=30, height=10, ng-show="job.is_run")
               td.schedule {{job.schedule}}
               td.last_run
                 a(href='#', ng-show="{{job.completed_at}}", data-toggle='tooltip', title=" {{job.completed_at | date:'MMM dd H:mm Z' }}", ng-if="job.completed_at") {{ job.completed_at | toUTCDate  }}
               td.next_run
                 a(href='#', data-toggle='tooltip', title="{{ job.next_run | date:'MMM dd H:mm Z' }} ") {{job.next_run | toUTCDate}}
-              td.log(ng-click="updateLog(job.id);showModal(job.logs.length)")
-                span {{job.logs[0].data.substr(0,100)}} <strong>...</strong>
-              
-        div.modal.fade.modal-logs(tabindex='-1', role='dialog', aria-labelledby='myLargeModalLabel', aria-hidden='true')
-          div.logs(tabindex='-1', role='dialog', aria-labelledby='myLargeModalLabel', aria-hidden='true')
-            div.modal-dialog.modal-lg
-              div.modal-content
-                ul.list-group
-                  li.list-group-item(ng-repeat="log in logs track by $index", ng-controller="LogCtrl")
-                    div.panel(ng-class="getLogClass(log.status)")
-                      div.panel-heading {{log.completedAt | toUTCDate }}
-                      div.panel-body.pandel-danger( ng-bind-html="log.data | to_trusted")
+              td.log(ng-click="showLogs(job.id);showModal(job.log.data)")
+                span {{job.log.data.substr(0,100)}} <strong>...</strong>
+
+        div.modal.fade.modal-logs(tabindex='-1', role='dialog', aria-labelledby='myLargeModalLabel', aria-hidden='false')
+          div.modal-dialog.modal-lg
+            div.modal-content
+              div.modal-header
+                h4.modal-title {{modalHeader}}
+              div.modal-body
+                div.text-center(ng-show="loadingLog"): img(src="img/ellipsis.svg" width="80")
+                div.panel(ng-class="getLogClass(log.status)" ng-repeat="log in logs track by $index" ng-controller="LogCtrl")
+                  div.panel-heading {{log.completedAt | toUTCDate }}
+                  div.panel-body.pandel-danger
+                    p(ng-bind-html="trimLog(log.data, 100) | to_trusted")
+                    h4.full-log(ng-click="showFullLog(log)" ng-show="isTrim(log, 100)" type="button" data-target="#showFulLog") --- See full log ---
+
+
+        div.modal.fade.modal-log(tabindex='1', id="showFulLog", role='dialog', aria-labelledby='myLog', aria-hidden='false', ng-controller="FullLogCtrl")
+          div.modal-dialog.modal-lg
+            div.modal-content
+              div.modal-header
+                .row
+                  .col-md-4
+                    h4.modal-title {{fullLog.completedAt | toUTCDate}}
+              div.modal-body(ng-bind-html="fullLog.data | to_trusted")
+              div.modal-footer
+                button.btn.btn-default.pull-left(type="button" ng-click="back()") Back
+
 
   script(src='./js/angular.min.js')
   script(src='./js/main.js')

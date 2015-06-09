@@ -21,6 +21,8 @@ app.get "/stats", json.stats
 
 app.get "/config", json.configs
 
+app.get '/logs/:id', json.logs
+
 app.get "/", (req, res) ->
   res.locals.moment = moment
   res.render "layout"
