@@ -5,6 +5,7 @@ client = bunny.client
 prefix = bunny.client.prefix
 
 exports.configs = (req, res) ->
+  bunny.options.version = require('../../../package.json').version
   res.json bunny.options
 
 exports.logs = (req, res) ->
