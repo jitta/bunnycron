@@ -3,6 +3,11 @@ Bunnycron is a job scheduling module trigged by your node.js process. Bunnycron 
 
 [![Build Status](https://travis-ci.org/jitta/bunnycron.svg)](https://travis-ci.org/jitta/bunnycron)
 
+
+
+
+![rabbit-resize](https://cloud.githubusercontent.com/assets/837612/8177518/c49d1a5e-142f-11e5-9d30-f7da1ee9e4f8.png)
+
 ## Installation
 
 Install via npm:
