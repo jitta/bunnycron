@@ -95,7 +95,7 @@ class Worker
       data: log
       status: @status
 
-    if @options && @options.consoleLog
+    if @options && @options.debug
       console.log log
 
     hash = @prefix + ':log:' + @job.id
