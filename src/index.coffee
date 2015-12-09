@@ -16,7 +16,7 @@ BunnyCron =  (@options = {})->
     self.jobs = Cron.loadFile(self.options.cronFile)
     self.worker = []
     for job in self.jobs
-      self.worker.push new Worker(job)
+      self.worker.push new Worker(job, self.options)
 
   createWorker() if @options.cronFile?
 

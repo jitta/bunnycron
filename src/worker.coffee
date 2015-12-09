@@ -6,7 +6,7 @@ events = require('events')
 noop = ->
 
 class Worker
-  constructor: (@job) ->
+  constructor: (@job, @options) ->
     @client = Worker.client
     @prefix = Worker.prefix
     @initStatus()
@@ -94,6 +94,9 @@ class Worker
       completedAt: Date.now()
       data: log
       status: @status
+
+    if @options && @options.debug
+      console.log log
 
     hash = @prefix + ':log:' + @job.id
     @client.multi().lpush(hash, JSON.stringify(logObj)).ltrim(hash, 0, 20).exec =>

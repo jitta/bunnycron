@@ -21,7 +21,7 @@ npm install bunnycron
 Bunnycron provides a clean user-interface for viewing your scheduled jobs.
 
 ![Homepage](https://cloud.githubusercontent.com/assets/837612/3614327/7ff3db9e-0dbf-11e4-8c7e-b045899b7c29.jpg)
- 
+
 ### Schedule Log
 The logging system allows you to see how your job processed
 
@@ -49,7 +49,7 @@ An example of `Cronfile` with the same syntax of your familiar Crontab
     Asterisk. E.g. *
     Ranges. E.g. 1-3,5
     Steps. E.g. */2
-    
+
 ## Cronfile Examples
     */10 * * * * 1-2  echo "Run every 10 seconds on Monday and Tuesday"
     00 */2 * * * *  echo "Run every 2 minutes everyday"
@@ -87,6 +87,7 @@ when required bunnycron module you can pass `options` in an object with the foll
 * `cronFile` : the directory path to `Cronfile` ex. `./path/to/dir`
 * `redis` : by default, Bunnycron will connect to Redis using the client default settings (port defaults to `6379` and host defaults to `127.0.0.1`, prefix defaults to `bunny`)
 * `prefix` : defaults to `bunny`. Custom redis predix
+* `debug` : send log data to stdout.
 
 
 
@@ -107,11 +108,11 @@ app.listen(3000);
 
 
 
-    
 
 
 
-## License 
+
+## License
 
 (The MIT License)
 
