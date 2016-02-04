@@ -14,7 +14,7 @@ describe 'Initialize', ->
 
   it 'Should throw error when not found Cronfile with default cronFile', ->
     bunny = require('../')()
-    error = "ENOENT, no such file or directory './Cronfile'"
+    error = "ENOENT: no such file or directory, open './Cronfile'"
     ( -> bunny.startCron()).should.throw(error)
 
 
@@ -22,12 +22,12 @@ describe 'Initialize', ->
     bunny = require('../')(
       cronFile: __dirname + '/notexist'
       )
-    error = "ENOENT, no such file or directory '#{__dirname}/notexist/Cronfile'"
+    error = "ENOENT: no such file or directory, open '#{__dirname}/notexist/Cronfile'"
     ( -> bunny.startCron()).should.throw(error)
 
   it.skip 'Should run once time per cron when run node multiple instance', (done) ->
 
-    datas = 
+    datas =
       child0: []
       child1: []
 
@@ -60,14 +60,7 @@ describe 'Initialize', ->
     setTimeout checkStdout, 1000 * 65
 
   it 'Should throw error when cron pattern invalid', ->
-    config = 
+    config =
       cronFile: __dirname + '/cronfile/invalid'
     bunny = require('../')(config)
     ( -> bunny.startCron()).should.throw(/Cron pattern not valid/);
-
-
-    
-
-
-
-

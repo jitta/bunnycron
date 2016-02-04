@@ -24,7 +24,7 @@ describe 'HTTP', ->
       @app = express()
       @app.use('/bunny/', bunny.app)
       done()
-      
+
     it "/bunny", (done) ->
       request(@app).get("/bunny/").expect(200, done)
 
@@ -33,7 +33,3 @@ describe 'HTTP', ->
 
     it "/bunny/config", (done) ->
       request(@app).get("/bunny/config").expect(200, done)
-
-
-
-

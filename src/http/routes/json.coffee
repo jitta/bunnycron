@@ -23,6 +23,9 @@ exports.stats = (req, res) ->
     if err
       return res.status(400).json error: err.message
 
+    unless results.data?
+      return res.json []
+      
     map = results.data.map((item) ->
         if results.logs?[item.id]?
           item.log = results.logs[item.id]
