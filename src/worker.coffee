@@ -58,10 +58,10 @@ class Worker
   isActive: (callback) ->
     @client.hsetnx @getKey(), "is_run", 'running', (err, is_run) ->
       if err
-        return callback err 
+        return callback err
       else
         if is_run is 1
-          callback null, false 
+          callback null, false
         else
           callback null, true
 
@@ -73,7 +73,7 @@ class Worker
     @set "next_run", @getNextRun()
     setTimeout =>
       self.del "is_run"
-    , 500 
+    , 500
 
     @log log
     return

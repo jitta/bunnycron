@@ -123,5 +123,3 @@ exports.parallel = parallel = (tasks, fn, done) ->
         fns.push (cb) -> fn task, cb
 
     async.parallel fns, done
-
-

@@ -8,7 +8,7 @@ Cron.loadFile = (file, callback) ->
   Jobs = []
   data = fs.readFileSync(file, "utf8")
   lines = data.split("\n")
-  for line in lines
+  for line, index in lines
     cols = line.split(" ")
     schedule = cols.slice(0, 6).join(" ")
     command = cols.slice(6).join(" ")
@@ -19,6 +19,7 @@ Cron.loadFile = (file, callback) ->
         id: makeJobId(line)
         schedule: schedule
         command: command
+        order: index + 1
 
       Jobs.push job
     else

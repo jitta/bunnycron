@@ -23,12 +23,13 @@ exports.stats = (req, res) ->
     if err
       return res.status(400).json error: err.message
 
-    map = results.data.map (item) ->
-      if results.logs?[item.id]?
-        item.log = results.logs[item.id]
+    map = results.data.map((item) ->
+        if results.logs?[item.id]?
+          item.log = results.logs[item.id]
 
-      return item
-    console.log map
+        return item
+      ).sort (a, b) -> a.order - b.order
+
     res.json map
 
 getJobsData = (done)->
