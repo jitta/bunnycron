@@ -14,16 +14,16 @@ describe 'Initialize', ->
 
   it 'Should throw error when not found Cronfile with default cronFile', ->
     bunny = require('../')()
-    error = "ENOENT: no such file or directory, open './Cronfile'"
-    ( -> bunny.startCron()).should.throw(error)
+
+    ( -> bunny.startCron()).should.throw(/no such file or directory/)
 
 
   it 'Should throw error when not found Cronfile with cronFile options', ->
     bunny = require('../')(
       cronFile: __dirname + '/notexist'
       )
-    error = "ENOENT: no such file or directory, open '#{__dirname}/notexist/Cronfile'"
-    ( -> bunny.startCron()).should.throw(error)
+
+    ( -> bunny.startCron()).should.throw(/no such file or directory/)
 
   it.skip 'Should run once time per cron when run node multiple instance', (done) ->
 
