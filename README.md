@@ -37,7 +37,7 @@ First create a `Cronfile` file in your root directory of your project.
 
 An example of `Cronfile` with the same syntax of your familiar Crontab
 
-    00 30 12 * * * node backup_databse.js
+    00 30 12 * * * node backup_database.js
 
 	*/10 * * * * * ./checkuptime.sh
 
@@ -77,9 +77,11 @@ var options = {
     port: 1234,
     host: '10.12.33.44',
     auth: 'fj2ifjeo2j'
-}
-bunny = require('bunnycron')(options);
-bunny.startCron()
+  }
+};
+
+var bunny = require('bunnycron')(options);
+bunny.startCron();
 ```
 
 when required bunnycron module you can pass `options` in an object with the following possible properties.
