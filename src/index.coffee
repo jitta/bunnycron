@@ -12,6 +12,7 @@ noop = ->
 BunnyCron =  (@options = {})->
   self = @
   @client = exports.client
+  @updateHealthcheckKey()
   createWorker = ->
     self.jobs = Cron.loadFile(self.options.cronFile)
     self.worker = []
@@ -111,6 +112,12 @@ BunnyCron::filterInactiveJobs = (keys, jobs) ->
 BunnyCron::del = (id, key, callback) ->
   hash = @options.prefix + ":job:" + id
   @client.hdel hash, key, callback or noop
+
+BunnyCron::updateHealthcheckKey = ->
+  setInterval =>
+    @client.set "#{@options.prefix}:healthcheck", Date.now()
+  , 2000
+
 
 BunnyCron::shutdown = exports.shutdown = ->
   BunnyCron.singleton = null

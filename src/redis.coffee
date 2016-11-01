@@ -43,13 +43,13 @@ exports.setupConfig = (options) ->
     client = redis.createClient( socket || port , host, options.redis.options )
     if options.redis.auth
       client.auth options.redis.auth
-    
+
     if options.redis.db
       client.select options.redis.db
     client.on 'error', (err) ->
-      console.log 'bunnycron connect redis error ', err
+      console.error 'bunnycron connect redis error ', err
 
     client.prefix = options.prefix
     client.getKey = (key) -> @prefix + ':' + key
-    
+
     return client
