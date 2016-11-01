@@ -30,21 +30,18 @@ app.get "/", (req, res) ->
       return res.send error.message
 
     res.render "layout"
-    res.json bunny
 
 app.get "/healthcheck", (req, res) ->
-  healthcheck (error, status) ->
+  healthcheck (error, status, unixTime) ->
     if error
       return res.send error: error.message
-
-    diff = (Date.now() - unixTime) / 1000
 
     if status is 'ok'
       statusCode = 200
     else
       statusCode = 500
 
-    return res.status(statusCode).send unixTime
+    return res.status(statusCode).send Date(unixTime)
 
 healthcheck = (callback) ->
   bunny.client.get "#{bunny.options.prefix}:healthcheck", (error, unixTime) ->
@@ -54,6 +51,6 @@ healthcheck = (callback) ->
     diff = (Date.now() - unixTime) / 1000
 
     if diff > 10
-      callback null, 'error'
+      callback null, 'error', unixTime
     else
-      callback null, 'ok'
+      callback null, 'ok', unixTime
