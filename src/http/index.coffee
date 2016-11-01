@@ -26,7 +26,6 @@ app.get '/logs/:id', json.logs
 app.get "/", (req, res) ->
   res.locals.moment = moment
   healthcheck (error, status) ->
-    console.log error, status
     if error
       return res.send error.message
 
